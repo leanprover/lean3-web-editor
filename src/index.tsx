@@ -111,7 +111,8 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
 
 interface LeanEditorProps {
   file: string;
-  persistent: boolean;
+  initialValue: string;
+  onValueChange?: (value: string) => void;
 }
 interface LeanEditorState {
   cursor?: monaco.Position;
@@ -123,22 +124,10 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   constructor(props) {
     super(props);
     this.state = {};
-    this.model = monaco.editor.createModel(this.getStoredCode(), 'lean', monaco.Uri.file(this.props.file));
-  }
-
-  getStoredCode() {
-    if (window.localStorage && this.props.persistent) {
-      const contents = localStorage.getItem(this.props.file);
-      if (contents) {
-        return contents;
-      }
-    }
-    return '-- Live javascript version of Lean\n\nexample (m n : ℕ) : m + n = n + m :=\nby simp';
-  }
-  saveCode() {
-    if (window.localStorage && this.props.persistent && this.editor) {
-      localStorage.setItem(this.props.file, this.editor.getValue());
-    }
+    this.model = monaco.editor.createModel(this.props.initialValue, 'lean', monaco.Uri.file(this.props.file));
+    this.model.onDidChangeContent((e) =>
+      this.props.onValueChange &&
+      this.props.onValueChange(this.model.getValue()));
   }
 
   componentDidMount() {
@@ -154,7 +143,6 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       model: this.model,
     };
     this.editor = monaco.editor.create(node, options);
-    this.editor.onDidChangeModel((e) => this.saveCode());
     this.editor.onDidChangeCursorPosition((e) => this.setState({cursor: e.position}));
     window.addEventListener('resize', this.updateDimensions.bind(this));
   }
@@ -183,12 +171,20 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
 }
 
-class App extends React.Component {
-  render() {
-    return (
-        <LeanEditor file='/test.lean' persistent={true} />
-    );
+const defaultValue =
+  '-- Live javascript version of Lean\n\nexample (m n : ℕ) : m + n = n + m :=\nby simp';
+
+function App() {
+  let value = defaultValue;
+  if (window.location.hash.startsWith('#code=')) {
+    value = decodeURI(window.location.hash.substring(6));
   }
+
+  return (
+    <LeanEditor file='/test.lean' initialValue={value} onValueChange={(newValue) => {
+      history.replaceState(undefined, undefined, '#code=' + encodeURI(newValue));
+    }} />
+  );
 }
 
 const leanJsOpts: LeanJsOpts = {

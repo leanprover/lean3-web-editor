@@ -116,6 +116,7 @@ interface LeanEditorProps {
 }
 interface LeanEditorState {
   cursor?: monaco.Position;
+  split: 'vertical' | 'horizontal';
 }
 class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   model: monaco.editor.IModel;
@@ -123,7 +124,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
 
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {split: 'vertical'};
     this.model = monaco.editor.createModel(this.props.initialValue, 'lean', monaco.Uri.file(this.props.file));
     this.model.onDidChangeContent((e) =>
       this.props.onValueChange &&
@@ -138,12 +139,13 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       readOnly: false,
       theme: 'vs',
       cursorStyle: 'line',
-      // automaticLayout: true,
+      automaticLayout: true,
       cursorBlinking: 'solid',
       model: this.model,
     };
     this.editor = monaco.editor.create(node, options);
     this.editor.onDidChangeCursorPosition((e) => this.setState({cursor: e.position}));
+    this.determineSplit();
     window.addEventListener('resize', this.updateDimensions.bind(this));
   }
   componentWillUnmount() {
@@ -153,19 +155,23 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
 
   updateDimensions() {
-    this.editor.layout();
+    this.determineSplit();
+  }
+  determineSplit() {
+    const node = findDOMNode<HTMLElement>(this.refs.root);
+    this.setState({split: node.clientHeight > node.clientWidth ? 'horizontal' : 'vertical'});
   }
 
   render() {
     return (
-      <div style={{display: 'grid', gridGap: '2em', height: '95vh', width: '95vw', gridTemplateColumns: '50% 50%',
-          gridTemplateRows: '100%'}}>
-        <div style={{gridColumn: 1, overflow: 'hidden'}}>
-          <div ref='monaco' style={{height: 'calc(100% - 35px)', width: '100%', overflow: 'hidden'}}/>
-        </div>
-        <div style={{gridColumn: 2}}>
+      <div style={{height: '95vh', width: '95vw'}} ref='root'>
+        <SplitPane split={this.state.split} defaultSize='50%' allowResize={true}>
+          <div ref='monaco' style={{
+            height: '100%', width: '100%',
+            marginRight: '2em',
+            overflow: 'hidden'}}/>
           <InfoView file={this.props.file} cursor={this.state.cursor}/>
-        </div>
+        </SplitPane>
       </div>
     );
   }

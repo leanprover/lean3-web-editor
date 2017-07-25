@@ -16,7 +16,7 @@ module.exports = {
     output: {
         path: distDir,
         filename: 'index.js',
-        publicPath: './',
+        publicPath: '/',
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js'],
@@ -40,7 +40,9 @@ module.exports = {
             template: 'public/index.html'
         }),
         new CopyWebpackPlugin([
-            { from: VSMonacoEditorSrc, to: 'vs', } ]),
+            { from: VSMonacoEditorSrc, to: 'vs', },
+            { from: 'public/index.css', to: 'index.css', },
+        ]),
     ],
     node: {
         child_process: 'empty',

@@ -7,6 +7,7 @@ import {registerLeanLanguage} from './langservice';
 
 interface LeanEditorProps {
   file: string;
+  persistent: boolean;
 }
 interface LeanEditorState {
   code: string;
@@ -16,9 +17,22 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
 
   constructor(props) {
     super(props);
-    this.state = {
-      code: '-- lean demo\n\ndef foo : nat := 5',
-    };
+    this.state = { code: this.getStoredCode() };
+  }
+
+  getStoredCode() {
+    if (window.localStorage && this.props.persistent) {
+      const contents = localStorage.getItem(this.props.file);
+      if (contents) {
+        return contents;
+      }
+    }
+    return '-- Live javascript version of Lean\n\nexample (m n : ℕ) : m + n = n + m :=\nby simp';
+  }
+  saveCode() {
+    if (window.localStorage && this.props.persistent && this.editor) {
+      localStorage.setItem(this.props.file, this.editor.getValue());
+    }
   }
 
   editorDidMount(editor: monaco.editor.ICodeEditor) {
@@ -26,6 +40,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
 
   onChange(newValue, e: monaco.editor.IModel) {
+    this.saveCode();
   }
 
   changeEditorValue() {
@@ -63,6 +78,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
               value={code}
               options={options}
               editorDidMount={(e) => this.editorDidMount(e)}
+              onChange={(v, e) => this.onChange(v, e)}
           />
         </div>
     );
@@ -72,14 +88,18 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
 class App extends React.Component {
   render() {
     return (
-        <LeanEditor file='test.lean' />
+        <LeanEditor file='test.lean' persistent={true} />
     );
   }
 }
 
+const leanJsOpts = {
+  javascript: 'https://leanprover.github.io/lean.js/lean3.js',
+};
+
 // tslint:disable-next-line:no-var-requires
 (window as any).require(['vs/editor/editor.main'], () => {
-  registerLeanLanguage();
+  registerLeanLanguage(leanJsOpts);
   render(
       <App />,
       document.getElementById('root'),

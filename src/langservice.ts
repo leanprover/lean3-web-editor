@@ -2,10 +2,6 @@
 import * as lean from 'lean-client-js-browser';
 import {leanSyntax} from './syntax';
 
-const leanJsOpts: lean.LeanJsOpts = {
-  javascript: 'https://leanprover.github.io/lean.js/lean3.js',
-};
-
 export class CoalescedTimer {
   private timer: number = undefined;
   do(ms: number, f: () => void) {
@@ -81,7 +77,7 @@ function toSeverity(severity: lean.Severity): monaco.Severity {
   }
 }
 
-export function registerLeanLanguage() {
+export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
   if (server) {
     return;
   }
@@ -157,7 +153,7 @@ export function registerLeanLanguage() {
             }
             return items;
         });
-    }),
+    }, () => undefined),
   });
 
   monaco.languages.registerHoverProvider('lean', {

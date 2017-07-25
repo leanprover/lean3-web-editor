@@ -16,7 +16,7 @@ module.exports = {
     output: {
         path: distDir,
         filename: 'index.js',
-        publicPath: '/',
+        publicPath: './',
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js'],

@@ -6,7 +6,7 @@ export const leanSyntax = {
       'def', 'lemma', 'theorem', 'example', 'axiom', 'constant',
       'class', 'instance', 'structure', 'inductive', 'variable', 'variables',
       'universe', 'universes',
-      'attribute', 'namespace', 'section',
+      'attribute', 'namespace', 'section', 'noncomputable',
       'do', 'have', 'let',
       'by', 'begin', 'end',
       'λ', '∀', 'Π', '∃', 'Σ',

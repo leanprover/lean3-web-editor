@@ -118,7 +118,7 @@ export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
   server = new lean.Server(transport);
   server.error.on((err) => console.log('error:', err));
   server.connect();
-  server.logMessagesToConsole = true;
+  // server.logMessagesToConsole = true;
 
   monaco.languages.register({
     id: 'lean',
@@ -143,6 +143,9 @@ export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
       const fn = model.uri.fsPath;
       const markers: monaco.editor.IMarkerData[] = [];
       for (const msg of allMsgs.msgs) {
+        if (msg.file_name !== fn) {
+          continue;
+        }
         const marker: monaco.editor.IMarkerData = {
           severity: toSeverity(msg.severity),
           message: msg.text,

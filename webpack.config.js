@@ -16,7 +16,7 @@ module.exports = {
     output: {
         path: distDir,
         filename: 'index.js',
-        publicPath: '/',
+        publicPath: '/lean-web-editor/',
     },
     resolve: {
         extensions: ['.ts', '.tsx', '.js'],

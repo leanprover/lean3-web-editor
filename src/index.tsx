@@ -11,6 +11,7 @@ const codeBlockStyle = {
   fontFamily: 'monospace',
   whiteSpace: 'pre-wrap',
   marginTop: '1em',
+  fontSize: '110%',
 };
 
 interface MessageWidgetProps {
@@ -165,12 +166,14 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   render() {
     return (
       <div style={{height: '95vh', width: '95vw'}} ref='root'>
-        <SplitPane split={this.state.split} defaultSize='50%' allowResize={true}>
+        <SplitPane split={this.state.split} defaultSize='50%' allowResize={true} style={{height: '95%'}}>
           <div ref='monaco' style={{
-            height: '100%', width: '100%',
-            marginRight: '2em',
+            height: 'calc(100% - 35px)', width: '100%',
+            margin: '1ex', marginRight: '2em',
             overflow: 'hidden'}}/>
-          <InfoView file={this.props.file} cursor={this.state.cursor}/>
+          <div style={{overflowY: 'auto', height: '100%', margin: '1ex' }}>
+            <InfoView file={this.props.file} cursor={this.state.cursor}/>
+          </div>
         </SplitPane>
       </div>
     );

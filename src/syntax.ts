@@ -3,11 +3,12 @@ export const leanSyntax = {
     // defaultToken: 'invalid',
 
     keywords: [
-      'def', 'lemma', 'theorem', 'example', 'axiom', 'constant',
+      'def', 'definition', 'lemma', 'theorem', 'example', 'axiom', 'constant',
       'class', 'instance', 'structure', 'inductive', 'variable', 'variables',
       'universe', 'universes',
       'attribute', 'namespace', 'section', 'noncomputable',
-      'do', 'have', 'let',
+      'do', 'have', 'let', 'assume',
+      'local', 'notation', 'open', 'export',
       'by', 'begin', 'end',
       'λ', '∀', 'Π', '∃', 'Σ',
       'if', 'this', 'break', 'protected', 'private', 'else',

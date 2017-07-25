@@ -1,6 +1,7 @@
 /// <reference types="monaco-editor" />
 import * as lean from 'lean-client-js-browser';
 import {leanSyntax} from './syntax';
+import * as translations from './translations.json';
 
 export class CoalescedTimer {
   private timer: number = undefined;
@@ -26,10 +27,12 @@ class ModelWatcher implements monaco.IDisposable {
     private syncTimer = new CoalescedTimer();
 
     constructor(private model: monaco.editor.IModel) {
-        this.changeSubscription = model.onDidChangeContent( () => {
+        this.changeSubscription = model.onDidChangeContent((e) => {
             completionBuffer.cancel();
+            this.checkInputCompletion(e);
             this.syncIn(delayMs);
         });
+        this.syncNow();
     }
 
     dispose() { this.changeSubscription.dispose(); }
@@ -44,6 +47,32 @@ class ModelWatcher implements monaco.IDisposable {
     }
 
     syncNow() { this.syncIn(0); }
+
+    checkInputCompletion(e: monaco.editor.IModelContentChangedEvent) {
+      if (e.changes.length !== 1) {
+        return;
+      }
+      const change = e.changes[0];
+      if (change.rangeLength === 0) {
+        if (change.text === ' ' || change.text === '\\') {
+          const lineNum = change.range.startLineNumber;
+          const line = this.model.getLineContent(change.range.startLineNumber);
+          const cursorPos = change.range.startColumn;
+          const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
+          const match = line.substring(index, cursorPos - 1);
+          const replaceText = translations[match];
+          if (index && replaceText) {
+            const range = new monaco.Range(lineNum, index, lineNum, cursorPos);
+            this.model.applyEdits([{
+              identifier: {major: 1, minor: 1},
+              range,
+              text: replaceText,
+              forceMoveMarkers: true,
+            }]);
+          }
+      }
+    }
+  }
 }
 
 class CompletionBuffer {
@@ -89,6 +118,7 @@ export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
   server = new lean.Server(transport);
   server.error.on((err) => console.log('error:', err));
   server.connect();
+  server.logMessagesToConsole = true;
 
   monaco.languages.register({
     id: 'lean',

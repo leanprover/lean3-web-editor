@@ -17,6 +17,7 @@ export class CoalescedTimer {
 }
 
 export let server: lean.Server;
+export let allMessages: lean.Message[] = [];
 
 const watchers = new Map<string, ModelWatcher>();
 
@@ -139,6 +140,7 @@ export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
   });
 
   server.allMessages.on((allMsgs) => {
+    allMessages = allMsgs.msgs;
     for (const model of monaco.editor.getModels()) {
       const fn = model.uri.fsPath;
       const markers: monaco.editor.IMarkerData[] = [];

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { findDOMNode, render } from 'react-dom';
 import MonacoEditor from 'react-monaco-editor';
 import * as SplitPane from 'react-split-pane';
-import {registerLeanLanguage, server} from './langservice';
+import { allMessages, registerLeanLanguage, server } from './langservice';
 
 const codeBlockStyle = {
   display: 'block',
@@ -77,13 +77,14 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
 
   componentWillMount() {
     this.subscriptions.push(
-      server.allMessages.on((allMsgs) => {
-        this.setState({
-          messages: allMsgs.msgs.filter((v) => v.file_name === this.props.file),
-        });
-        // this.forceUpdate();
-      }),
+      server.allMessages.on((allMsgs) => this.updateMessages(this.props)),
     );
+  }
+
+  updateMessages(nextProps) {
+    this.setState({
+      messages: allMessages.filter((v) => v.file_name === this.props.file),
+    });
   }
 
   componentWillUnmount() {
@@ -106,6 +107,7 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   }
 
   componentWillReceiveProps(nextProps) {
+    this.updateMessages(nextProps);
     this.refreshGoal(nextProps);
   }
 
@@ -204,8 +206,9 @@ function App() {
     value = decodeURI(window.location.hash.substring(6));
   }
 
+  const fn = monaco.Uri.file('test.lean').fsPath;
   return (
-    <LeanEditor file='/test.lean' initialValue={value} onValueChange={(newValue) => {
+    <LeanEditor file={fn} initialValue={value} onValueChange={(newValue) => {
       history.replaceState(undefined, undefined, '#code=' + encodeURI(newValue));
     }} />
   );

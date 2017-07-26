@@ -3,7 +3,7 @@ export const leanSyntax = {
     // defaultToken: 'invalid',
 
     keywords: [
-      'def', 'definition', 'lemma', 'theorem', 'example', 'axiom', 'constant',
+      'def', 'definition', 'lemma', 'theorem', 'example', 'axiom', 'constant', 'constants',
       'class', 'instance', 'structure', 'inductive', 'variable', 'variables',
       'universe', 'universes',
       'attribute', 'namespace', 'section', 'noncomputable',

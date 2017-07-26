@@ -16,8 +16,30 @@ export class CoalescedTimer {
   }
 }
 
+export class ReactiveValue<E> {
+  updated = new lean.Event<E>();
+  private lastValue: E;
+
+  constructor(initialValue: E) {
+    this.lastValue = initialValue;
+    this.updated.on((e) => this.lastValue = e);
+  }
+
+  get value() { return this.lastValue; }
+}
+
 export let server: lean.Server;
 export let allMessages: lean.Message[] = [];
+
+export const currentlyRunning = new ReactiveValue<string[]>([]);
+function addToRunning(fn: string) {
+  if (currentlyRunning.value.indexOf(fn) === -1) {
+    currentlyRunning.updated.fire([].concat([fn], currentlyRunning.value));
+  }
+}
+function removeFromRunning(fn: string) {
+  currentlyRunning.updated.fire(currentlyRunning.value.filter((v) => v !== fn));
+}
 
 const watchers = new Map<string, ModelWatcher>();
 
@@ -26,6 +48,7 @@ const delayMs = 200;
 class ModelWatcher implements monaco.IDisposable {
     private changeSubscription: monaco.IDisposable;
     private syncTimer = new CoalescedTimer();
+    private version = 0;
 
     constructor(private model: monaco.editor.IModel) {
         this.changeSubscription = model.onDidChangeContent((e) => {
@@ -39,11 +62,17 @@ class ModelWatcher implements monaco.IDisposable {
     dispose() { this.changeSubscription.dispose(); }
 
     syncIn(ms: number) {
+        addToRunning(this.model.uri.fsPath);
+        const version = (this.version += 1);
         this.syncTimer.do(ms, () => {
             if (!server) {
                 return;
             }
-            server.sync(this.model.uri.fsPath, this.model.getValue());
+            server.sync(this.model.uri.fsPath, this.model.getValue()).then(() => {
+              if (this.version === version) {
+                removeFromRunning(this.model.uri.fsPath);
+              }
+            });
         });
     }
 

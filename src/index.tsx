@@ -4,7 +4,7 @@ import * as React from 'react';
 import { findDOMNode, render } from 'react-dom';
 import MonacoEditor from 'react-monaco-editor';
 import * as SplitPane from 'react-split-pane';
-import { allMessages, registerLeanLanguage, server } from './langservice';
+import { allMessages, currentlyRunning, registerLeanLanguage, server } from './langservice';
 
 const codeBlockStyle = {
   display: 'block',
@@ -66,24 +66,34 @@ interface InfoViewProps {
 interface InfoViewState {
   goal?: GoalWidgetProps;
   messages: Message[];
+  currentlyRunning: boolean;
 }
 class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   private subscriptions: monaco.IDisposable[] = [];
 
   constructor(props: InfoViewProps) {
     super(props);
-    this.state = { messages: [] };
+    this.state = { messages: [], currentlyRunning: true };
   }
 
   componentWillMount() {
+    this.updateMessages(this.props);
+    this.updateRunning(this.props);
     this.subscriptions.push(
       server.allMessages.on((allMsgs) => this.updateMessages(this.props)),
+      currentlyRunning.updated.on((fns) => this.updateRunning(this.props)),
     );
   }
 
   updateMessages(nextProps) {
     this.setState({
       messages: allMessages.filter((v) => v.file_name === this.props.file),
+    });
+  }
+
+  updateRunning(nextProps) {
+    this.setState({
+      currentlyRunning: currentlyRunning.value.indexOf(nextProps.file) !== -1,
     });
   }
 
@@ -95,11 +105,14 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   }
 
   render() {
+    const isRunning = this.state.currentlyRunning &&
+      <div style={{fontStyle: 'italic', marginBottom: '1em'}}>running...</div>;
     const goal = this.state.goal && (<div key={'goal'}>{GoalWidget(this.state.goal)}</div>);
     const msgs = this.state.messages.map((msg, i) =>
       (<div key={i}>{MessageWidget({msg})}</div>));
     return (
       <div>
+        {isRunning}
         {goal}
         {msgs}
       </div>
@@ -109,6 +122,7 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   componentWillReceiveProps(nextProps) {
     this.updateMessages(nextProps);
     this.refreshGoal(nextProps);
+    this.updateRunning(nextProps);
   }
 
   refreshGoal(nextProps?: InfoViewProps) {

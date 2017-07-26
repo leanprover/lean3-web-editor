@@ -12,7 +12,7 @@ export const leanSyntax = {
       'by', 'begin', 'end',
       'λ', '∀', 'Π', '∃', 'Σ',
       'if', 'this', 'break', 'protected', 'private', 'else',
-      '#print', '#check', '#eval',
+      '#print', '#check', '#eval', '#reduce', '#help', '#exit', '#unify', '#compile',
       'set_option', 'import', 'prelude',
     ],
 

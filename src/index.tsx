@@ -34,15 +34,20 @@ function MessageWidget({msg}: MessageWidgetProps) {
   );
 }
 
+interface Position {
+  line: number;
+  column: number;
+}
+
 interface GoalWidgetProps {
   goal: InfoRecord;
-  position: monaco.Position;
+  position: Position;
 }
 function GoalWidget({goal, position}: GoalWidgetProps) {
   return (
     <div style={{paddingBottom: '1em'}}>
       <div style={{borderBottom: '1px solid', fontWeight: 'bold', fontFamily: 'sans-serif'}}>
-        goal at {position.lineNumber}:{position.column - 1}</div>
+        goal at {position.line}:{position.column}</div>
       <div style={codeBlockStyle}>{goal.state}</div>
     </div>
   );
@@ -50,7 +55,7 @@ function GoalWidget({goal, position}: GoalWidgetProps) {
 
 interface InfoViewProps {
   file: string;
-  cursor?: monaco.Position;
+  cursor?: Position;
 }
 interface InfoViewState {
   goal?: GoalWidgetProps;
@@ -95,17 +100,20 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.refreshGoal();
+    this.refreshGoal(nextProps);
   }
 
-  refreshGoal() {
-    if (!this.props.cursor) {
+  refreshGoal(nextProps?: InfoViewProps) {
+    if (!nextProps) {
+      nextProps = this.props;
+    }
+    if (!nextProps.cursor) {
       return;
     }
 
-    const position = this.props.cursor;
-    server.info(this.props.file, position.lineNumber, position.column - 1).then((res) => {
-      this.setState({goal: res.record && res.record.state && {goal: res.record, position}});
+    const position = nextProps.cursor;
+    server.info(nextProps.file, position.line, position.column).then((res) => {
+      this.setState({goal: res.record && res.record.state && { goal: res.record, position }});
     });
   }
 }
@@ -116,7 +124,7 @@ interface LeanEditorProps {
   onValueChange?: (value: string) => void;
 }
 interface LeanEditorState {
-  cursor?: monaco.Position;
+  cursor?: Position;
   split: 'vertical' | 'horizontal';
 }
 class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
@@ -145,7 +153,8 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       model: this.model,
     };
     this.editor = monaco.editor.create(node, options);
-    this.editor.onDidChangeCursorPosition((e) => this.setState({cursor: e.position}));
+    this.editor.onDidChangeCursorPosition((e) =>
+      this.setState({cursor: {line: e.position.lineNumber, column: e.position.column - 1}}));
     this.determineSplit();
     window.addEventListener('resize', this.updateDimensions.bind(this));
   }

@@ -14,6 +14,12 @@ const codeBlockStyle = {
   fontSize: '110%',
 };
 
+function leanColorize(text: string): string {
+  // TODO(gabriel): use promises
+  const colorized: string = (monaco.editor.colorize(text, 'lean', {}) as any)._value;
+  return colorized.replace(/&nbsp;/g, ' ');
+}
+
 interface MessageWidgetProps {
   msg: Message;
 }
@@ -29,7 +35,7 @@ function MessageWidget({msg}: MessageWidgetProps) {
       <div style={{ borderBottom: '1px solid', fontFamily: 'sans-serif',
           fontWeight: 'bold', color: colorOfSeverity[msg.severity] }}>
         {msg.pos_line}:{msg.pos_col}: {msg.severity}: {msg.caption}</div>
-      <div style={codeBlockStyle}>{msg.text}</div>
+      <div style={codeBlockStyle} dangerouslySetInnerHTML={{__html: leanColorize(msg.text)}}/>
     </div>
   );
 }
@@ -48,7 +54,7 @@ function GoalWidget({goal, position}: GoalWidgetProps) {
     <div style={{paddingBottom: '1em'}}>
       <div style={{borderBottom: '1px solid', fontWeight: 'bold', fontFamily: 'sans-serif'}}>
         goal at {position.line}:{position.column}</div>
-      <div style={codeBlockStyle}>{goal.state}</div>
+      <div style={codeBlockStyle} dangerouslySetInnerHTML={{__html: leanColorize(goal.state)}}/>
     </div>
   );
 }

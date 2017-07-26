@@ -63,6 +63,7 @@ class ModelWatcher implements monaco.IDisposable {
 
     syncIn(ms: number) {
         addToRunning(this.model.uri.fsPath);
+        completionBuffer.cancel();
         const version = (this.version += 1);
         this.syncTimer.do(ms, () => {
             if (!server) {
@@ -123,6 +124,7 @@ class CompletionBuffer {
         if (this.timer) {
             clearTimeout(this.timer);
             this.reject('timeout');
+            this.timer = undefined;
         }
     }
 }

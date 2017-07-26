@@ -7,7 +7,7 @@ export const leanSyntax = {
       'class', 'instance', 'structure', 'inductive', 'variable', 'variables',
       'universe', 'universes',
       'attribute', 'namespace', 'section', 'noncomputable',
-      'do', 'have', 'let', 'assume',
+      'do', 'have', 'let', 'assume', 'suffices', 'show', 'from',
       'local', 'notation', 'open', 'export',
       'by', 'begin', 'end',
       'λ', '∀', 'Π', '∃', 'Σ',

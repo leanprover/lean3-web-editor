@@ -2,7 +2,6 @@
 import { InfoRecord, LeanJsOpts, Message, Severity } from 'lean-client-js-browser';
 import * as React from 'react';
 import { findDOMNode, render } from 'react-dom';
-import MonacoEditor from 'react-monaco-editor';
 import * as SplitPane from 'react-split-pane';
 import { allMessages, currentlyRunning, registerLeanLanguage, server } from './langservice';
 

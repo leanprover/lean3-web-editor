@@ -1,0 +1,8 @@
+[package]
+name = "combined_lib"
+version = "3.2.0"
+
+[dependencies]
+library_dev = {git = "https://github.com/leanprover/library_dev", rev = "2694cabf2edfbf0c4cd4560f014dbe26dcd3fdf1"}
+super = {git = "https://github.com/leanprover/super", rev = "f557a546ed0a2d1a5cd91f1d68b656c944a8fdb0"}
+mini_crush = {git = "https://github.com/leanprover/mini_crush", rev = "c6cfa12d6c2954823f608c85cabcd0cb3bf589c2"}

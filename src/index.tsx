@@ -228,10 +228,10 @@ function App() {
 }
 
 const leanJsOpts: LeanJsOpts = {
-  javascript: 'https://gebner.github.io/lean-web-editor/lean_js_js.js',
-  libraryZip: 'https://gebner.github.io/lean-web-editor/library.zip',
-  webassemblyJs: 'https://gebner.github.io/lean-web-editor/lean_js_wasm.js',
-  webassemblyWasm: 'https://gebner.github.io/lean-web-editor/lean_js_wasm.wasm',
+  javascript: './lean_js_js.js',
+  libraryZip: './library.zip',
+  webassemblyJs: './lean_js_wasm.js',
+  webassemblyWasm: './lean_js_wasm.wasm',
 };
 
 // tslint:disable-next-line:no-var-requires

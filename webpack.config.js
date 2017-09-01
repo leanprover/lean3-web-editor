@@ -34,7 +34,10 @@ module.exports = {
             },
         ],
     },
-    devServer: { contentBase: distDir },
+    devServer: {
+        contentBase: distDir,
+        publicPath: '/',
+    },
     plugins: [
         new HtmlWebpackPlugin({
             template: 'public/index.html'
@@ -42,6 +45,7 @@ module.exports = {
         new CopyWebpackPlugin([
             { from: VSMonacoEditorSrc, to: 'vs', },
             { from: 'public/index.css', to: 'index.css', },
+            { from: 'public/lean_logo.svg', to: 'lean_logo.svg', },
         ]),
     ],
     node: {

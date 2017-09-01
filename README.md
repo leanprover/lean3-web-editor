@@ -7,7 +7,6 @@ This repository contains the javascript code for the [lean live editor](https://
 ```
 npm install
 ./fetch_lean_js.sh
-./node_modules/.bin/webpack
 ./node_modules/.bin/webpack-dev-server
 ```
 

@@ -1,8 +1,10 @@
 [package]
 name = "combined_lib"
 version = "3.2.0"
+lean_version = "master"
 
 [dependencies]
-library_dev = {git = "https://github.com/leanprover/library_dev", rev = "2694cabf2edfbf0c4cd4560f014dbe26dcd3fdf1"}
-super = {git = "https://github.com/leanprover/super", rev = "f557a546ed0a2d1a5cd91f1d68b656c944a8fdb0"}
-mini_crush = {git = "https://github.com/leanprover/mini_crush", rev = "c6cfa12d6c2954823f608c85cabcd0cb3bf589c2"}
+super = {git = "https://github.com/leanprover/super", rev = "0386fbfaad62bfb92c8b0233802076851549c913"}
+mini_crush = {git = "https://github.com/leanprover/mini_crush", rev = "1cd6de995d82103bd267cabec2049bd04e898134"}
+mathlib = {git = "https://github.com/leanprover/mathlib", rev = "dbc8f869db43dec94f54198cebb7f572d2feac45"}
+slim_check = {git = "https://github.com/cipher1024/slim_check", rev = "cb1e3f88e379d9f0ca6290e9d6cf0b83db833a97"}

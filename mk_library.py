@@ -3,7 +3,8 @@ import zipfile
 import os, subprocess, json
 from pathlib import Path
 
-zf = zipfile.ZipFile('dist/library.zip', 'w')
+library_zip_fn = 'dist/library.zip'
+zf = zipfile.ZipFile(library_zip_fn, 'w')
 
 os.chdir('combined_lib')
 subprocess.call(['leanpkg', 'build'])
@@ -22,5 +23,7 @@ for p in lean_path:
             content = open(fn, 'rb').read()
             zf.writestr(zipfile.ZipInfo(filename=str(rel)), content)
             already_seen.add(rel)
+
+print('Created {0} with {1} olean files'.format(library_zip_fn, len(already_seen)))
 
 zf.close()

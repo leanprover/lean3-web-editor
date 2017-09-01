@@ -6,6 +6,7 @@ from pathlib import Path
 zf = zipfile.ZipFile('dist/library.zip', 'w')
 
 os.chdir('combined_lib')
+subprocess.call(['leanpkg', 'build'])
 lean_p = json.loads(subprocess.check_output(['lean', '-p']))
 lean_path = [Path(p).resolve() for p in lean_p["path"]]
 

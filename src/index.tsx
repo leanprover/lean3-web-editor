@@ -65,22 +65,19 @@ interface InfoViewProps {
 interface InfoViewState {
   goal?: GoalWidgetProps;
   messages: Message[];
-  currentlyRunning: boolean;
 }
 class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   private subscriptions: monaco.IDisposable[] = [];
 
   constructor(props: InfoViewProps) {
     super(props);
-    this.state = { messages: [], currentlyRunning: true };
+    this.state = { messages: [] };
   }
 
   componentWillMount() {
     this.updateMessages(this.props);
-    this.updateRunning(this.props);
     this.subscriptions.push(
       server.allMessages.on((allMsgs) => this.updateMessages(this.props)),
-      currentlyRunning.updated.on((fns) => this.updateRunning(this.props)),
     );
   }
 
@@ -88,6 +85,66 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
     this.setState({
       messages: allMessages.filter((v) => v.file_name === this.props.file),
     });
+  }
+
+  componentWillUnmount() {
+    for (const s of this.subscriptions) {
+      s.dispose();
+    }
+    this.subscriptions = [];
+  }
+
+  render() {
+    const goal = this.state.goal && (<div key={'goal'}>{GoalWidget(this.state.goal)}</div>);
+    const msgs = this.state.messages.map((msg, i) =>
+      (<div key={i}>{MessageWidget({msg})}</div>));
+    return (
+      <div>
+        {goal}
+        {msgs}
+      </div>
+    );
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.updateMessages(nextProps);
+    this.refreshGoal(nextProps);
+  }
+
+  refreshGoal(nextProps?: InfoViewProps) {
+    if (!nextProps) {
+      nextProps = this.props;
+    }
+    if (!nextProps.cursor) {
+      return;
+    }
+
+    const position = nextProps.cursor;
+    server.info(nextProps.file, position.line, position.column).then((res) => {
+      this.setState({goal: res.record && res.record.state && { goal: res.record, position }});
+    });
+  }
+}
+
+interface PageHeaderProps {
+  file: string;
+}
+interface PageHeaderState {
+  currentlyRunning: boolean;
+}
+class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
+  private subscriptions: monaco.IDisposable[] = [];
+
+  constructor(props: PageHeaderProps) {
+    super(props);
+    this.state = { currentlyRunning: true };
+  }
+
+  componentWillMount() {
+    this.updateRunning(this.props);
+    this.subscriptions.push(
+      currentlyRunning.updated.on((fns) => this.updateRunning(this.props)),
+    );
   }
 
   updateRunning(nextProps) {
@@ -105,37 +162,22 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
 
   render() {
     const isRunning = this.state.currentlyRunning &&
-      <div style={{fontStyle: 'italic', marginBottom: '1em'}}>running...</div>;
-    const goal = this.state.goal && (<div key={'goal'}>{GoalWidget(this.state.goal)}</div>);
-    const msgs = this.state.messages.map((msg, i) =>
-      (<div key={i}>{MessageWidget({msg})}</div>));
+      <div style={{fontStyle: 'italic'}}>(running...)</div>;
     return (
-      <div>
-        {isRunning}
-        {goal}
-        {msgs}
+      <div style={{height: '100%'}}>
+        <img src='./lean_logo.svg' style={{height: '100%', float: 'left', paddingLeft: '1em', paddingRight: '3em'}}/>
+        <div style={{padding: '1em'}}>
+          <div style={{fontSize: '80%'}}>
+            Live in-browser version of the <a href='https://leanprover.github.io/'>Lean theorem prover</a>.
+          </div>
+          {isRunning}
+        </div>
       </div>
     );
   }
 
   componentWillReceiveProps(nextProps) {
-    this.updateMessages(nextProps);
-    this.refreshGoal(nextProps);
     this.updateRunning(nextProps);
-  }
-
-  refreshGoal(nextProps?: InfoViewProps) {
-    if (!nextProps) {
-      nextProps = this.props;
-    }
-    if (!nextProps.cursor) {
-      return;
-    }
-
-    const position = nextProps.cursor;
-    server.info(nextProps.file, position.line, position.column).then((res) => {
-      this.setState({goal: res.record && res.record.state && { goal: res.record, position }});
-    });
   }
 }
 
@@ -172,6 +214,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       automaticLayout: true,
       cursorBlinking: 'solid',
       model: this.model,
+      minimap: {enabled: false},
     };
     this.editor = monaco.editor.create(node, options);
     this.editor.onDidChangeCursorPosition((e) =>
@@ -194,19 +237,22 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
 
   render() {
-    return (
-      <div style={{height: '95vh', width: '95vw'}} ref='root'>
-        <SplitPane split={this.state.split} defaultSize='50%' allowResize={true} style={{height: '95%'}}>
+    return (<div>
+      <div style={{height: '5em', overflow: 'hidden'}}>
+        <PageHeader file={this.props.file}/>
+      </div>
+      <div style={{height: 'calc(99vh - 5em)', width: '100%', position: 'relative'}} ref='root'>
+        <SplitPane split={this.state.split} defaultSize='50%' allowResize={true}>
           <div ref='monaco' style={{
-            height: 'calc(100% - 35px)', width: '100%',
+            height: '100%', width: '100%',
             margin: '1ex', marginRight: '2em',
             overflow: 'hidden'}}/>
-          <div style={{overflowY: 'auto', height: '100%', margin: '1ex' }}>
+          <div style={{overflowY: 'scroll', height: 'calc(100% - 10px)', margin: '1ex' }}>
             <InfoView file={this.props.file} cursor={this.state.cursor}/>
           </div>
         </SplitPane>
       </div>
-    );
+    </div>);
   }
 }
 

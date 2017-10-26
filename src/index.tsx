@@ -204,7 +204,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
 
   componentDidMount() {
-    const node = findDOMNode<HTMLElement>(this.refs.monaco);
+    const node = findDOMNode(this.refs.monaco) as HTMLElement;
     const options: monaco.editor.IEditorConstructionOptions = {
       selectOnLineNumbers: true,
       roundedSelection: false,
@@ -232,7 +232,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
     this.determineSplit();
   }
   determineSplit() {
-    const node = findDOMNode<HTMLElement>(this.refs.root);
+    const node = findDOMNode(this.refs.root) as HTMLElement;
     this.setState({split: node.clientHeight > node.clientWidth ? 'horizontal' : 'vertical'});
   }
 

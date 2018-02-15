@@ -31,5 +31,9 @@
     "webpack": "^3.8.1",
     "webpack-dev-server": "^2.9.3",
     "worker-loader": "^1.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leanprover/lean-web-editor.git"
   }
 }

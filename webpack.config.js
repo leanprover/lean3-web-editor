@@ -27,7 +27,6 @@ module.exports = {
             {
                 test: /\.tsx?$/,
                 loader: [
-                    'react-hot-loader',
                     'babel-loader?presets[]=env',
                     'ts-loader'
                 ],

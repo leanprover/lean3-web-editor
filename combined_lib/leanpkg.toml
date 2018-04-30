@@ -1,9 +1,9 @@
 [package]
 name = "combined_lib"
-version = "3.3.0"
-lean_version = "3.3.0"
+version = "3.4.1"
+lean_version = "3.4.1"
 
 [dependencies]
-super = {git = "https://github.com/leanprover/super", rev = "0386fbfaad62bfb92c8b0233802076851549c913"}
-mini_crush = {git = "https://github.com/leanprover/mini_crush", rev = "1cd6de995d82103bd267cabec2049bd04e898134"}
-mathlib = {git = "https://github.com/leanprover/mathlib", rev = "f705963c812680897bf4ddc5504f33dcf2e60fad"}
+super = {git = "https://github.com/leanprover/super", rev = "ea69e23d395df3da3ac1fd28d4934db9dc866bea"}
+mini_crush = {git = "https://github.com/leanprover/mini_crush", rev = "03c955233c20accaaa2f8445dd910cf9ec2cac58"}
+mathlib = {git = "https://github.com/leanprover/mathlib", rev = "a97101d2df5d186848075a2d0452f6a04d8a13eb"}

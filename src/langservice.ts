@@ -43,7 +43,7 @@ function removeFromRunning(fn: string) {
 
 const watchers = new Map<string, ModelWatcher>();
 
-const delayMs = 200;
+export let delayMs = 1000;
 
 class ModelWatcher implements monaco.IDisposable {
     private changeSubscription: monaco.IDisposable;
@@ -150,7 +150,7 @@ export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
   server = new lean.Server(transport);
   server.error.on((err) => console.log('error:', err));
   server.connect();
-  // server.logMessagesToConsole = true;
+  server.logMessagesToConsole = true;
 
   monaco.languages.register({
     id: 'lean',

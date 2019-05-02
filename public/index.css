@@ -2,6 +2,64 @@ body {
     margin: 0;
 }
 
+.running {
+    display: none;
+}
+
+.leanlink {
+    font-size: 80%;
+}
+
+.Pane.horizontal.Pane2 {
+    max-height: 33%;
+}
+
+.headerContainer {
+    height: 6.5em;
+    overflow: hidden;
+}
+
+@media screen and (min-width: 370px) and (max-width: 700px) {
+    .logo {
+        display: none;
+    }
+    .running {
+        display: inline;
+    }
+    .leanheader {
+        font-size: 80%;
+    }
+    .leanlink {
+        font-size: 110%;
+    }
+    .headerContainer {
+        height: 5em;
+        overflow: visible;
+    }
+}
+
+@media screen and (max-width: 369px) {
+    .logo {
+        display: none;
+    }
+    .url {
+        display: none;
+    }
+    .running {
+        display: inline;
+    }
+    .leanheader {
+        font-size: 80%;
+    }
+    .leanlink {
+        font-size: 110%;
+    }
+    .headerContainer {
+        height: 6em;
+        overflow: visible;
+    }
+}
+
 .Resizer {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;

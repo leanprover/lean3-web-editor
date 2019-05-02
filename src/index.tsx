@@ -98,10 +98,11 @@ class ToggleDoc extends React.Component<ToggleDocProps, ToggleDocState> {
     this.setState({ showDoc: !this.state.showDoc });
   }
   render() {
-    return <div onClick={this.onClick} style={{marginTop: '1em', cursor: 'pointer'}}>
+    return <div onClick={this.onClick} style={{marginTop: '1em', cursor: 'pointer',
+      whiteSpace: 'pre-wrap'}}>
       {this.state.showDoc ?
         this.props.doc : // TODO: markdown / highlighting?
-        <span style={{color: '#346'}}>[show docstring]</span>}
+        <span>{this.props.doc.slice(0, 75)} <span style={{color: '#246'}}>[...]</span></span>}
       <br /><br />
     </div>;
   }
@@ -148,7 +149,7 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
     const msgs = this.state.messages.map((msg, i) =>
       (<div key={i}>{MessageWidget({msg})}</div>));
     return (
-      <div>
+      <div style={{overflow: 'auto', height: '100%'}}>
         {goal}
         {msgs}
       </div>
@@ -195,6 +196,7 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
     super(props);
     this.state = { currentlyRunning: true };
     this.onFile = this.onFile.bind(this);
+    this.restart = this.restart.bind(this);
   }
 
   componentWillMount() {
@@ -225,24 +227,40 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
     this.props.clearUrlParam();
   }
 
+  restart() {
+    server.restart();
+  }
+
   render() {
-    // const isRunning = this.state.currentlyRunning &&
-      // <div style={{fontStyle: 'italic'}}>(running...)</div>;
+    const isRunning = this.state.currentlyRunning ?
+      <div className='running' style={{fontStyle: 'italic', fontWeight: 'bold',
+        color: 'orange'}}>(running...)</div> :
+      <div className='running' style={{fontStyle: 'italic',
+        color: 'green'}}>(ready!)</div>;
     const borderStyle = this.state.currentlyRunning ? 'dotted orange 4px' : 'solid green 2px';
     // TODO: add input for delayMs ?
     return (
-      <div style={{height: '100%', display: 'flex'}}>
-        <img src='./lean_logo.svg' style={{height: '85%', margin: '1ex', paddingLeft: '1em',
+      <div className='leanheader' style={{height: '100%', display: 'flex'}}>
+        <img className='logo' src='./lean_logo.svg' style={{height: '85%', margin: '1ex', paddingLeft: '1em',
         paddingRight: '1em', border: borderStyle, borderRadius: '15px'}}/>
         <div style={{padding: '1em', flexGrow: 1}}>
           <UrlForm url={this.props.url} onSubmit={this.props.onSubmit}
           clearUrlParam={this.props.clearUrlParam} />
-          <label htmlFor='lean_upload'>Load .lean file from disk </label>
+          <label className='logo' htmlFor='lean_upload'>Load .lean from disk </label>
           <input id='lean_upload' type='file' accept='.lean' onChange={this.onFile} />
-          <button onClick={this.props.onSave}>Save to disk</button>
-          <div style={{fontSize: '80%'}}>
-            Live in-browser version of the <a href='https://leanprover.github.io/'>Lean theorem prover</a>.
+          <div style={{float: 'right'}} >
+            <button onClick={this.props.onSave}>Download editor<br/> content to disk</button>
+            <button onClick={this.restart}>Restart server:<br/>will redownload<br/>library.zip!</button>
           </div>
+          <div className='leanlink'>
+            <span className='logo'>Live in-browser version of the </span>
+            <a href='https://leanprover.github.io/'>Lean
+              <span className='logo'> theorem prover</span>
+            </a>
+            <span className='running'> on the go!</span>
+            <span className='logo'>.</span>
+          </div>
+          {isRunning}
           {this.props.status}
         </div>
       </div>
@@ -286,7 +304,8 @@ class UrlForm extends React.Component<UrlFormProps, UrlFormState> {
       <div style={{display: 'flex'}}>
       <form onSubmit={this.handleSubmit} style={{display: 'flex', justifyContent: 'flex-end',
       flex: 1}}>
-        URL: <input type='text' value={this.state.value} onChange={this.handleChange}
+        <span className='url'>Load .lean from </span>
+        URL:&nbsp;<input type='text' value={this.state.value} onChange={this.handleChange}
         style={{flex: 1}}/>
         <input type='submit' value='Load' />
       </form></div>
@@ -362,7 +381,10 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
     if (this.state.url) {
       try {
         fetch(this.state.url).then((s) => s.text())
-          .then((s) => this.model.setValue(s));
+          .then((s) => {
+            this.model.setValue(s);
+            this.setState({ status: null });
+          });
       } catch (e) {
         // won't show CORS errors, also 404's etc. don't qualify as errors
         this.setState({ status: e.toString() });
@@ -405,7 +427,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
 
   render() {
     return (<div>
-      <div style={{height: '6.5em', overflow: 'hidden'}}>
+      <div className='headerContainer'>
         <PageHeader file={this.props.file} url={this.props.initialUrl}
         onSubmit={this.onSubmit} status={this.state.status}
         onSave={this.onSave} onLoad={this.onLoad} clearUrlParam={this.props.clearUrlParam} />
@@ -416,7 +438,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
             height: '100%', width: '100%',
             margin: '2ex', marginRight: '2em',
             overflow: 'hidden'}}/>
-          <div style={{overflowY: 'scroll', height: 'calc(100% - 10px)', margin: '1ex' }}>
+          <div style={{height: 'calc(100% - 10px)', margin: '1ex'}}>
             <InfoView file={this.props.file} cursor={this.state.cursor}/>
           </div>
         </SplitPane>
@@ -432,7 +454,7 @@ function App() {
   const initUrl: URL = new URL(window.location.href);
   const params: URLSearchParams = initUrl.searchParams;
   // get target key/value from URLSearchParams object
-  const url: string = params.has('url') ? decodeURI(params.get('url')) : null;
+  const url: string = params.has('url') ? decodeURI(params.get('url')) : '';
   const value: string = params.has('code') ? decodeURI(params.get('code')) :
     (url ? `-- loading from ${url}` : defaultValue);
 

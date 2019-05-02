@@ -2,6 +2,8 @@ const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const TerserPlugin = require('terser-webpack-plugin-legacy');
+
 const MonacoEditorSrc = path.join(__dirname, 'node_modules', 'react-monaco-editor');
 const VSMonacoEditorSrc = path.join(__dirname, 'node_modules', 'monaco-editor', 'min', 'vs');
 
@@ -46,6 +48,7 @@ module.exports = {
             { from: 'public/index.css', to: 'index.css', },
             { from: 'public/lean_logo.svg', to: 'lean_logo.svg', },
         ]),
+        new TerserPlugin(),
     ],
     node: {
         child_process: 'empty',
@@ -55,4 +58,4 @@ module.exports = {
         // react: 'require("react")',
         // 'react-dom': 'require("react-dom")',
     },
-}
+};

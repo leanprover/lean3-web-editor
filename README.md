@@ -17,7 +17,7 @@ The `fetch_lean_js.sh` script fetches a precompiled javascript version as well a
 ```
 npm install
 ./fetch_lean_js.sh
-./node_modules/.bin/webpack
+NODE_ENV=production ./node_modules/.bin/webpack
 ```
 
 Then copy the `./dist` directory wherever you want.

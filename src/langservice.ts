@@ -150,7 +150,7 @@ export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
   server = new lean.Server(transport);
   server.error.on((err) => console.log('error:', err));
   server.connect();
-  server.logMessagesToConsole = true;
+  // server.logMessagesToConsole = true;
 
   monaco.languages.register({
     id: 'lean',

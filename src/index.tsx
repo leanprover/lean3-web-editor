@@ -196,7 +196,7 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
     super(props);
     this.state = { currentlyRunning: true };
     this.onFile = this.onFile.bind(this);
-    this.restart = this.restart.bind(this);
+    // this.restart = this.restart.bind(this);
   }
 
   componentWillMount() {
@@ -227,31 +227,38 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
     this.props.clearUrlParam();
   }
 
-  restart() {
-    server.restart();
-  }
+  // This doesn't work! /test.lean not found after restarting
+  // restart() {
+  //   // server.restart();
+  //   registerLeanLanguage(leanJsOpts);
+  // }
 
   render() {
-    const isRunning = this.state.currentlyRunning ?
-      <div className='running' style={{fontStyle: 'italic', fontWeight: 'bold',
-        color: 'orange'}}>(running...)</div> :
-      <div className='running' style={{fontStyle: 'italic',
-        color: 'green'}}>(ready!)</div>;
-    const borderStyle = this.state.currentlyRunning ? 'dotted orange 4px' : 'solid green 2px';
-    // TODO: add input for delayMs ?
+    const isRunning = this.state.currentlyRunning ? 'running...' : 'ready!';
+    const runColor = this.state.currentlyRunning ? 'orange' : 'lightgreen';
+    // TODO: add input for delayMs
+    // checkbox for console spam
+    // server.logMessagesToConsole = true;
     return (
-      <div className='leanheader' style={{height: '100%', display: 'flex'}}>
-        <img className='logo' src='./lean_logo.svg' style={{height: '85%', margin: '1ex', paddingLeft: '1em',
-        paddingRight: '1em', border: borderStyle, borderRadius: '15px'}}/>
-        <div style={{padding: '1em', flexGrow: 1}}>
+      <div className='wrap-collapsible'>
+      <input id='collapsible' className='toggle' type='checkbox' defaultChecked={true}/>
+      <label style={{background: runColor}} htmlFor='collapsible' className='lbl-toggle' tabIndex={0}>
+          Lean is {isRunning}
+      </label>
+      <div className='collapsible-content'>
+      <div className='content-inner'>
+      <div className='leanheader' style={{display: 'flex'}}>
+        <img className='logo' src='./lean_logo.svg' style={{height: '5em', margin: '1ex', paddingLeft: '1em',
+        paddingRight: '1em' /*, border: borderStyle, borderRadius: '15px' */}}/>
+        <div style={{padding: '1em 1em 0.25em 1em', flexGrow: 1}}>
           <UrlForm url={this.props.url} onSubmit={this.props.onSubmit}
           clearUrlParam={this.props.clearUrlParam} />
-          <label className='logo' htmlFor='lean_upload'>Load .lean from disk </label>
-          <input id='lean_upload' type='file' accept='.lean' onChange={this.onFile} />
-          <div style={{float: 'right'}} >
+          <div style={{float: 'right', margin: '1em'}} >
             <button onClick={this.props.onSave}>Download editor<br/> content to disk</button>
-            <button onClick={this.restart}>Restart server:<br/>will redownload<br/>library.zip!</button>
+            {/* <button onClick={this.restart}>Restart server:<br/>will redownload<br/>library.zip!</button> */}
           </div>
+          <label className='logo' htmlFor='lean_upload'>Load .lean from disk:&nbsp;</label>
+          <input id='lean_upload' type='file' accept='.lean' onChange={this.onFile} />
           <div className='leanlink'>
             <span className='logo'>Live in-browser version of the </span>
             <a href='https://leanprover.github.io/'>Lean
@@ -260,9 +267,11 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
             <span className='running'> on the go!</span>
             <span className='logo'>.</span>
           </div>
-          {isRunning}
           {this.props.status}
         </div>
+        </div>
+        </div>
+      </div>
       </div>
     );
   }
@@ -304,7 +313,7 @@ class UrlForm extends React.Component<UrlFormProps, UrlFormState> {
       <div style={{display: 'flex'}}>
       <form onSubmit={this.handleSubmit} style={{display: 'flex', justifyContent: 'flex-end',
       flex: 1}}>
-        <span className='url'>Load .lean from </span>
+        <span className='url'>Load .lean from&nbsp;</span>
         URL:&nbsp;<input type='text' value={this.state.value} onChange={this.handleChange}
         style={{flex: 1}}/>
         <input type='submit' value='Load' />
@@ -398,7 +407,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
   determineSplit() {
     const node = findDOMNode(this.refs.root) as HTMLElement;
-    this.setState({split: node.clientHeight > node.clientWidth ? 'horizontal' : 'vertical'});
+    this.setState({split: node.clientHeight > 0.8 * node.clientWidth ? 'horizontal' : 'vertical'});
   }
 
   onSubmit(value) {
@@ -426,17 +435,18 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
 
   render() {
-    return (<div>
+    return (<div style={{height: '99vh', display: 'flex', flexDirection: 'column'}}>
       <div className='headerContainer'>
         <PageHeader file={this.props.file} url={this.props.initialUrl}
         onSubmit={this.onSubmit} status={this.state.status}
         onSave={this.onSave} onLoad={this.onLoad} clearUrlParam={this.props.clearUrlParam} />
       </div>
-      <div style={{height: 'calc(99vh - 6.5em)', width: '100%', position: 'relative'}} ref='root'>
-        <SplitPane split={this.state.split} defaultSize='67%' allowResize={true}>
+      <div className='editorContainer' ref='root'>
+        <SplitPane split={this.state.split} defaultSize='60%' allowResize={true}>
           <div ref='monaco' style={{
             height: '100%', width: '100%',
-            margin: '2ex', marginRight: '2em',
+            margin: '2ex 0em 2ex -1ex',
+            paddingRight: '6px',
             overflow: 'hidden'}}/>
           <div style={{height: 'calc(100% - 10px)', margin: '1ex'}}>
             <InfoView file={this.props.file} cursor={this.state.cursor}/>

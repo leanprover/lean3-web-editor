@@ -2,6 +2,20 @@ body {
     margin: 0;
 }
 
+.code-block {
+    display: block;
+    font-family: monospace;
+    white-space: pre-wrap;
+    margin-top: 1em;
+    font-size: 110%;
+}
+
+.info-header {
+    border-bottom: 1px solid;
+    font-weight: bold;
+    font-family: sans-serif;
+}
+
 .running {
     display: none;
 }
@@ -14,9 +28,38 @@ body {
     max-height: 33%;
 }
 
+.leaneditorContainer {
+    height: 99vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.leanheader {
+    display: flex;
+    border-bottom: 1.5px solid rgb(93, 101, 116);
+}
+
 .headerContainer {
-    /* height: 6.5em; */
     overflow: hidden;
+}
+
+.headerForms {
+    padding: 1em 1em 0.25em 1em;
+    flex-grow: 1;
+}
+
+.urlForm {
+    display: flex;
+}
+
+.urlForm form {
+    display: flex;
+    justify-content: flex-end;
+    flex: 1;
+}
+
+.urlForm input[type='text'] {
+    flex: 1;
 }
 
 .editorContainer {
@@ -25,6 +68,26 @@ body {
     position: relative;
 }
 
+.monacoContainer {
+    height: 100%;
+    width: 100%;
+    margin: 2ex 0em 2ex -1ex;
+    padding-right: 6px;
+    overflow: hidden;
+}
+
+.infoContainer {
+    height: calc(100% - 10px);
+    margin: 1ex;
+}
+
+.toggleDoc {
+    margin-top: 1em;
+    cursor: pointer;
+    white-space: pre-wrap;
+}
+
+/* https://alligator.io/css/collapsible/ */
 .wrap-collabsible {
     margin-bottom: 1.2rem 0;
 }
@@ -35,21 +98,9 @@ input[type='checkbox'] {
 
 .lbl-toggle {
     display: block;
-
-    /* font-weight: bold;
-    font-family: monospace;
-    font-size: 1.2rem;
-    text-transform: uppercase; */
     text-align: center;
-
-    /* padding: 0.1rem; */
-
     color: #222;
-    /* background: #FAE042; */
-
     cursor: pointer;
-
-    /* border-radius: 7px; */
     transition: all 0.25s ease-out;
 }
 
@@ -90,14 +141,6 @@ input[type='checkbox'] {
     border-bottom-left-radius: 0;
 }
 
-.collapsible-content .content-inner {
-    /* background: rgba(250, 224, 66, .2); */
-    border-bottom: 1.5px solid rgb(93, 101, 116);
-    /* border-bottom-left-radius: 7px; */
-    /* border-bottom-right-radius: 7px; */
-    /* padding: .5rem 1rem; */
-}
-
 @media screen and (min-width: 370px) and (max-width: 700px) {
     .logo {
         display: none;
@@ -111,10 +154,6 @@ input[type='checkbox'] {
     .leanlink {
         font-size: 110%;
     }
-    /* .headerContainer {
-        height: 5em;
-        overflow: visible;
-    } */
 }
 
 @media screen and (max-width: 369px) {
@@ -133,10 +172,6 @@ input[type='checkbox'] {
     .leanlink {
         font-size: 110%;
     }
-    /* .headerContainer {
-        height: 6em;
-        overflow: visible;
-    } */
 }
 
 .Resizer {
@@ -172,7 +207,6 @@ input[type='checkbox'] {
 
 .Resizer.vertical {
     width: 11px;
-    /* margin: 0 5px; */
     border-left: 5px solid rgba(255, 255, 255, 0);
     border-right: 5px solid rgba(255, 255, 255, 0);
     cursor: col-resize;

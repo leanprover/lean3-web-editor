@@ -6,14 +6,6 @@ import * as sp from 'react-split-pane';
 import { allMessages, currentlyRunning, delayMs, registerLeanLanguage, server } from './langservice';
 export const SplitPane: any = sp;
 
-const codeBlockStyle = {
-  display: 'block',
-  fontFamily: 'monospace',
-  whiteSpace: 'pre-wrap',
-  marginTop: '1em',
-  fontSize: '110%',
-};
-
 function leanColorize(text: string): string {
   // TODO(gabriel): use promises
   const colorized: string = (monaco.editor.colorize(text, 'lean', {}) as any)._value;
@@ -29,13 +21,12 @@ function MessageWidget({msg}: MessageWidgetProps) {
     warning: 'orange',
     error: 'red',
   };
-
+  // TODO: links and decorations on hover
   return (
     <div style={{paddingBottom: '1em'}}>
-      <div style={{ borderBottom: '1px solid', fontFamily: 'sans-serif',
-          fontWeight: 'bold', color: colorOfSeverity[msg.severity] }}>
+      <div className='info-header' style={{ color: colorOfSeverity[msg.severity] }}>
         {msg.pos_line}:{msg.pos_col}: {msg.severity}: {msg.caption}</div>
-      <div style={codeBlockStyle} dangerouslySetInnerHTML={{__html: leanColorize(msg.text)}}/>
+      <div className='code-block' dangerouslySetInnerHTML={{__html: leanColorize(msg.text)}}/>
     </div>
   );
 }
@@ -50,25 +41,22 @@ interface GoalWidgetProps {
   position: Position;
 }
 function GoalWidget({goal, position}: GoalWidgetProps) {
-  const tacticHeader = goal.text && <div style={{borderBottom: '1px solid',
-    fontWeight: 'bold', fontFamily: 'sans-serif'}}>
+  const tacticHeader = goal.text && <div className='info-header'>
     tactic {<span style={{fontWeight: 'normal'}}> {goal.text} </span>}
     at {position.line}:{position.column}</div>;
   const docs = goal.doc && <ToggleDoc doc={goal.doc}/>;
 
-  const typeHeader = goal.type && <div style={{borderBottom: '1px solid',
-    fontWeight: 'bold', fontFamily: 'sans-serif'}}>
+  const typeHeader = goal.type && <div className='info-header'>
     type {goal['full-id'] && <span> of <span style={{fontWeight: 'normal'}}>
       {goal['full-id']}</span> </span>}
     at {position.line}:{position.column}</div>;
   const typeBody = (goal.type && !goal.text) // don't show type of tactics
-    && <div style={codeBlockStyle}
+    && <div className='code-block'
     dangerouslySetInnerHTML={{__html: leanColorize(goal.type) + (!goal.doc && '<br />')}}/>;
 
-  const goalStateHeader = goal.state && <div style={{borderBottom: '1px solid',
-    fontWeight: 'bold', fontFamily: 'sans-serif'}}>
+  const goalStateHeader = goal.state && <div className='info-header'>
     goal at {position.line}:{position.column}</div>;
-  const goalStateBody = goal.state && <div style={codeBlockStyle}
+  const goalStateBody = goal.state && <div className='code-block'
     dangerouslySetInnerHTML={{__html: leanColorize(goal.state)}}/>;
 
   return (
@@ -98,8 +86,7 @@ class ToggleDoc extends React.Component<ToggleDocProps, ToggleDocState> {
     this.setState({ showDoc: !this.state.showDoc });
   }
   render() {
-    return <div onClick={this.onClick} style={{marginTop: '1em', cursor: 'pointer',
-      whiteSpace: 'pre-wrap'}}>
+    return <div onClick={this.onClick} className='toggleDoc'>
       {this.state.showDoc ?
         this.props.doc : // TODO: markdown / highlighting?
         <span>{this.props.doc.slice(0, 75)} <span style={{color: '#246'}}>[...]</span></span>}
@@ -246,11 +233,10 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
           Lean is {isRunning}
       </label>
       <div className='collapsible-content'>
-      <div className='content-inner'>
-      <div className='leanheader' style={{display: 'flex'}}>
+      <div className='leanheader'>
         <img className='logo' src='./lean_logo.svg' style={{height: '5em', margin: '1ex', paddingLeft: '1em',
-        paddingRight: '1em' /*, border: borderStyle, borderRadius: '15px' */}}/>
-        <div style={{padding: '1em 1em 0.25em 1em', flexGrow: 1}}>
+        paddingRight: '1em'}}/>
+        <div className='headerForms'>
           <UrlForm url={this.props.url} onSubmit={this.props.onSubmit}
           clearUrlParam={this.props.clearUrlParam} />
           <div style={{float: 'right', margin: '1em'}} >
@@ -268,7 +254,6 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
             <span className='logo'>.</span>
           </div>
           {this.props.status}
-        </div>
         </div>
         </div>
       </div>
@@ -310,12 +295,10 @@ class UrlForm extends React.Component<UrlFormProps, UrlFormState> {
 
   render() {
     return (
-      <div style={{display: 'flex'}}>
-      <form onSubmit={this.handleSubmit} style={{display: 'flex', justifyContent: 'flex-end',
-      flex: 1}}>
+      <div className='urlForm'>
+      <form onSubmit={this.handleSubmit}>
         <span className='url'>Load .lean from&nbsp;</span>
-        URL:&nbsp;<input type='text' value={this.state.value} onChange={this.handleChange}
-        style={{flex: 1}}/>
+        URL:&nbsp;<input type='text' value={this.state.value} onChange={this.handleChange}/>
         <input type='submit' value='Load' />
       </form></div>
     );
@@ -435,7 +418,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
 
   render() {
-    return (<div style={{height: '99vh', display: 'flex', flexDirection: 'column'}}>
+    return (<div className='leaneditorContainer'>
       <div className='headerContainer'>
         <PageHeader file={this.props.file} url={this.props.initialUrl}
         onSubmit={this.onSubmit} status={this.state.status}
@@ -443,12 +426,8 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       </div>
       <div className='editorContainer' ref='root'>
         <SplitPane split={this.state.split} defaultSize='60%' allowResize={true}>
-          <div ref='monaco' style={{
-            height: '100%', width: '100%',
-            margin: '2ex 0em 2ex -1ex',
-            paddingRight: '6px',
-            overflow: 'hidden'}}/>
-          <div style={{height: 'calc(100% - 10px)', margin: '1ex'}}>
+          <div ref='monaco' className='monacoContainer'/>
+          <div className='infoContainer'>
             <InfoView file={this.props.file} cursor={this.state.cursor}/>
           </div>
         </SplitPane>

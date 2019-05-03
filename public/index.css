@@ -6,6 +6,7 @@ body {
     display: block;
     font-family: monospace;
     white-space: pre-wrap;
+    overflow-wrap: break-word;
     margin-top: 1em;
     font-size: 110%;
 }
@@ -24,10 +25,6 @@ body {
     font-size: 80%;
 }
 
-.Pane.horizontal.Pane2 {
-    max-height: 33%;
-}
-
 .leaneditorContainer {
     height: 99vh;
     display: flex;
@@ -36,7 +33,6 @@ body {
 
 .leanheader {
     display: flex;
-    border-bottom: 1.5px solid rgb(93, 101, 116);
 }
 
 .headerContainer {
@@ -64,20 +60,19 @@ body {
 
 .editorContainer {
     flex: 1;
-    width: 100%;
     position: relative;
+    border-top: 1.5px dotted rgb(93, 101, 116);
 }
 
 .monacoContainer {
     height: 100%;
     width: 100%;
-    margin: 2ex 0em 2ex -1ex;
-    padding-right: 6px;
+    margin: 1ex 0em 1ex -1.5ex;
+    padding-right: 10px;
     overflow: hidden;
 }
 
 .infoContainer {
-    height: calc(100% - 10px);
     margin: 1ex;
 }
 
@@ -192,6 +187,7 @@ input[type='checkbox'] {
 }
 
 .Resizer.horizontal {
+    background-color: gray;
     height: 11px;
     margin: 5px 0;
     border-top: 5px solid rgba(255, 255, 255, 0);
@@ -206,6 +202,7 @@ input[type='checkbox'] {
 }
 
 .Resizer.vertical {
+    background-color: gray;
     width: 11px;
     border-left: 5px solid rgba(255, 255, 255, 0);
     border-right: 5px solid rgba(255, 255, 255, 0);
@@ -215,4 +212,12 @@ input[type='checkbox'] {
 .Resizer.vertical:hover {
     border-left: 5px solid rgba(0, 0, 0, 0.5);
     border-right: 5px solid rgba(0, 0, 0, 0.5);
+}
+
+.Pane.horizontal.Pane2 {
+    border-top: 1px solid gray;
+}
+
+.Pane.vertical.Pane2 {
+    border-left: 1px solid gray;
 }

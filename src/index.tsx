@@ -90,7 +90,7 @@ class ToggleDoc extends React.Component<ToggleDocProps, ToggleDocState> {
       {this.state.showDoc ?
         this.props.doc : // TODO: markdown / highlighting?
         <span>{this.props.doc.slice(0, 75)} <span style={{color: '#246'}}>[...]</span></span>}
-      <br /><br />
+      <br/><br/>
     </div>;
   }
 }
@@ -110,43 +110,28 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
     super(props);
     this.state = { messages: [] };
   }
-
   componentWillMount() {
     this.updateMessages(this.props);
     this.subscriptions.push(
       server.allMessages.on((allMsgs) => this.updateMessages(this.props)),
     );
   }
-
-  updateMessages(nextProps) {
-    this.setState({
-      messages: allMessages.filter((v) => v.file_name === this.props.file),
-    });
-  }
-
   componentWillUnmount() {
     for (const s of this.subscriptions) {
       s.dispose();
     }
     this.subscriptions = [];
   }
-
-  render() {
-    const goal = this.state.goal && (<div key={'goal'}>{GoalWidget(this.state.goal)}</div>);
-    const msgs = this.state.messages.map((msg, i) =>
-      (<div key={i}>{MessageWidget({msg})}</div>));
-    return (
-      <div style={{overflow: 'auto', height: '100%'}}>
-        {goal}
-        {msgs}
-      </div>
-    );
-  }
-
   componentWillReceiveProps(nextProps) {
     if (nextProps.cursor === this.props.cursor) { return; }
     this.updateMessages(nextProps);
     this.refreshGoal(nextProps);
+  }
+
+  updateMessages(nextProps) {
+    this.setState({
+      messages: allMessages.filter((v) => v.file_name === this.props.file),
+    });
   }
 
   refreshGoal(nextProps?: InfoViewProps) {
@@ -162,6 +147,18 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
       this.setState({goal: res.record && { goal: res.record, position }});
     });
   }
+
+  render() {
+    const goal = this.state.goal && (<div key={'goal'}>{GoalWidget(this.state.goal)}</div>);
+    const msgs = this.state.messages.map((msg, i) =>
+      (<div key={i}>{MessageWidget({msg})}</div>));
+    return (
+      <div style={{overflow: 'auto', height: '100%'}}>
+        {goal}
+        {msgs}
+      </div>
+    );
+  }
 }
 
 interface PageHeaderProps {
@@ -172,6 +169,7 @@ interface PageHeaderProps {
   onSave: () => void;
   onLoad: (localFile: string) => void;
   clearUrlParam: () => void;
+  onChecked: () => void;
 }
 interface PageHeaderState {
   currentlyRunning: boolean;
@@ -192,18 +190,20 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
       currentlyRunning.updated.on((fns) => this.updateRunning(this.props)),
     );
   }
-
-  updateRunning(nextProps) {
-    this.setState({
-      currentlyRunning: currentlyRunning.value.indexOf(nextProps.file) !== -1,
-    });
-  }
-
   componentWillUnmount() {
     for (const s of this.subscriptions) {
       s.dispose();
     }
     this.subscriptions = [];
+  }
+  componentWillReceiveProps(nextProps) {
+    this.updateRunning(nextProps);
+  }
+
+  updateRunning(nextProps) {
+    this.setState({
+      currentlyRunning: currentlyRunning.value.indexOf(nextProps.file) !== -1,
+    });
   }
 
   onFile(e) {
@@ -228,41 +228,36 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
     // server.logMessagesToConsole = true;
     return (
       <div className='wrap-collapsible'>
-      <input id='collapsible' className='toggle' type='checkbox' defaultChecked={true}/>
-      <label style={{background: runColor}} htmlFor='collapsible' className='lbl-toggle' tabIndex={0}>
-          Lean is {isRunning}
-      </label>
-      <div className='collapsible-content'>
-      <div className='leanheader'>
-        <img className='logo' src='./lean_logo.svg' style={{height: '5em', margin: '1ex', paddingLeft: '1em',
-        paddingRight: '1em'}}/>
-        <div className='headerForms'>
-          <UrlForm url={this.props.url} onSubmit={this.props.onSubmit}
-          clearUrlParam={this.props.clearUrlParam} />
-          <div style={{float: 'right', margin: '1em'}} >
-            <button onClick={this.props.onSave}>Download editor<br/> content to disk</button>
-            {/* <button onClick={this.restart}>Restart server:<br/>will redownload<br/>library.zip!</button> */}
+        <input id='collapsible' className='toggle' type='checkbox' defaultChecked={true}
+        onChange={this.props.onChecked}/>
+        <label style={{background: runColor}} htmlFor='collapsible' className='lbl-toggle' tabIndex={0}>
+            Lean is {isRunning}
+        </label>
+        <div className='collapsible-content'><div className='leanheader'>
+          <img className='logo' src='./lean_logo.svg'
+          style={{height: '5em', margin: '1ex', paddingLeft: '1em', paddingRight: '1em'}}/>
+          <div className='headerForms'>
+            <UrlForm url={this.props.url} onSubmit={this.props.onSubmit}
+            clearUrlParam={this.props.clearUrlParam}/>
+            <div style={{float: 'right', margin: '1em'}}>
+              <button onClick={this.props.onSave}>Download editor<br/> content to disk</button>
+              {/* <button onClick={this.restart}>Restart server:<br/>will redownload<br/>library.zip!</button> */}
+            </div>
+            <label className='logo' htmlFor='lean_upload'>Load .lean from disk:&nbsp;</label>
+            <input id='lean_upload' type='file' accept='.lean' onChange={this.onFile}/>
+            <div className='leanlink'>
+              <span className='logo'>Live in-browser version of the </span>
+              <a href='https://leanprover.github.io/'>Lean
+                <span className='logo'> theorem prover</span>
+              </a>
+              <span className='running'> on the go!</span>
+              <span className='logo'>.</span>
+            </div>
+            {this.props.status}
           </div>
-          <label className='logo' htmlFor='lean_upload'>Load .lean from disk:&nbsp;</label>
-          <input id='lean_upload' type='file' accept='.lean' onChange={this.onFile} />
-          <div className='leanlink'>
-            <span className='logo'>Live in-browser version of the </span>
-            <a href='https://leanprover.github.io/'>Lean
-              <span className='logo'> theorem prover</span>
-            </a>
-            <span className='running'> on the go!</span>
-            <span className='logo'>.</span>
-          </div>
-          {this.props.status}
-        </div>
-        </div>
-      </div>
+        </div></div>
       </div>
     );
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.updateRunning(nextProps);
   }
 }
 
@@ -318,6 +313,8 @@ interface LeanEditorState {
   split: 'vertical' | 'horizontal';
   url: string;
   status: string;
+  size: number;
+  checked: boolean;
 }
 class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   model: monaco.editor.IModel;
@@ -329,6 +326,8 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       split: 'vertical',
       url: this.props.initialUrl,
       status: null,
+      size: null,
+      checked: true,
     };
     this.model = monaco.editor.createModel(this.props.initialValue, 'lean', monaco.Uri.file(this.props.file));
     this.model.onDidChangeContent((e) =>
@@ -336,11 +335,12 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       this.props.onValueChange(this.model.getValue()));
 
     this.updateDimensions = this.updateDimensions.bind(this);
+    this.dragFinished = this.dragFinished.bind(this);
     this.onSubmit = this.onSubmit.bind(this);
     this.onSave = this.onSave.bind(this);
     this.onLoad = this.onLoad.bind(this);
+    this.onChecked = this.onChecked.bind(this);
   }
-
   componentDidMount() {
     const node = findDOMNode(this.refs.monaco) as HTMLElement;
     const options: monaco.editor.IEditorConstructionOptions = {
@@ -391,6 +391,10 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   determineSplit() {
     const node = findDOMNode(this.refs.root) as HTMLElement;
     this.setState({split: node.clientHeight > 0.8 * node.clientWidth ? 'horizontal' : 'vertical'});
+    // can we reset the pane "size" when split changes?
+  }
+  dragFinished(newSize) {
+    this.setState({ size: newSize });
   }
 
   onSubmit(value) {
@@ -411,23 +415,38 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       window.URL.revokeObjectURL(url);
     }, 0);
   }
-
   onLoad(fileStr) {
     this.model.setValue(fileStr);
     this.props.clearUrlParam();
   }
 
+  onChecked() {
+    this.setState({ checked: !this.state.checked });
+  }
+
   render() {
+    const infoStyle = {
+      height: (this.state.size && (this.state.split === 'horizontal')) ?
+        `calc(95vh - ${this.state.checked ? 115 : 0}px - ${this.state.size}px)` :
+        (this.state.split === 'horizontal' ?
+        // crude hack to set initial height if horizontal
+          `calc(35vh - ${this.state.checked ? 45 : 0}px)` :
+          '100%'),
+      width: (this.state.size && (this.state.split === 'vertical')) ?
+        `calc(98vw - ${this.state.size}px)` :
+        (this.state.split === 'vertical' ? '38vw' : '99%'),
+      };
     return (<div className='leaneditorContainer'>
       <div className='headerContainer'>
         <PageHeader file={this.props.file} url={this.props.initialUrl}
-        onSubmit={this.onSubmit} status={this.state.status}
-        onSave={this.onSave} onLoad={this.onLoad} clearUrlParam={this.props.clearUrlParam} />
+        onSubmit={this.onSubmit} clearUrlParam={this.props.clearUrlParam} status={this.state.status}
+        onSave={this.onSave} onLoad={this.onLoad} onChecked={this.onChecked}/>
       </div>
       <div className='editorContainer' ref='root'>
-        <SplitPane split={this.state.split} defaultSize='60%' allowResize={true}>
+        <SplitPane split={this.state.split} defaultSize='60%' allowResize={true}
+        onDragFinished={this.dragFinished}>
           <div ref='monaco' className='monacoContainer'/>
-          <div className='infoContainer'>
+          <div className='infoContainer' style={infoStyle}>
             <InfoView file={this.props.file} cursor={this.state.cursor}/>
           </div>
         </SplitPane>

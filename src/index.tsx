@@ -240,7 +240,7 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
             <UrlForm url={this.props.url} onSubmit={this.props.onSubmit}
             clearUrlParam={this.props.clearUrlParam}/>
             <div style={{float: 'right', margin: '1em'}}>
-              <button onClick={this.props.onSave}>Download editor<br/> content to disk</button>
+              <button onClick={this.props.onSave}>Save</button>
               {/* <button onClick={this.restart}>Restart server:<br/>will redownload<br/>library.zip!</button> */}
             </div>
             <label className='logo' htmlFor='lean_upload'>Load .lean from disk:&nbsp;</label>

@@ -5,7 +5,6 @@ import { createPortal, findDOMNode, render } from 'react-dom';
 import * as sp from 'react-split-pane';
 import { allMessages, checkInputCompletion, currentlyRunning, delayMs,
   registerLeanLanguage, server } from './langservice';
-import { isNullOrUndefined } from 'util';
 export const SplitPane: any = sp;
 
 function leanColorize(text: string): string {

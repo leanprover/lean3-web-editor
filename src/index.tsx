@@ -5,6 +5,7 @@ import { createPortal, findDOMNode, render } from 'react-dom';
 import * as sp from 'react-split-pane';
 import { allMessages, checkInputCompletion, currentlyRunning, delayMs,
   registerLeanLanguage, server } from './langservice';
+import { isNullOrUndefined } from 'util';
 export const SplitPane: any = sp;
 
 function leanColorize(text: string): string {
@@ -446,7 +447,9 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
     this.model = monaco.editor.createModel(this.props.initialValue, 'lean', monaco.Uri.file(this.props.file));
     this.model.onDidChangeContent((e) => {
       this.newCursor = checkInputCompletion(e, this.editor, this.model);
-      return this.props.onValueChange &&
+      // do not change code URL param unless user has actually typed
+      // (this makes the #url=... param a little more "sticky")
+      return !e.isFlush && this.props.onValueChange &&
         this.props.onValueChange(this.model.getValue());
     });
 
@@ -588,28 +591,51 @@ if s ≠ "" then s ++ ", " else s, "commit ", (lean.githash.to_list.take 12).as_
 example (m n : ℕ) : m + n = n + m :=
 by simp`;
 
+interface HashParams {
+  url: string;
+  code: string;
+}
+function parseHash(hash: string): HashParams {
+  hash = hash.slice(1);
+  const hashObj = hash.split('&').map((s) => s.split('='))
+    .reduce( (pre, [key, value]) => ({ ...pre, [key]: value }), {} ) as any;
+  const url = decodeURIComponent(hashObj.url || '');
+  const code = decodeURIComponent(hashObj.code || defaultValue);
+  return { url, code };
+}
+function paramsToString(params: HashParams): string {
+  let s: string;
+  if (params.url) {
+    s = '#url=' + encodeURIComponent(params.url);
+  }
+  // nonempty params.code will wipe out params.url
+  if (params.code) {
+    params.url = null;
+    s = '#code=' + encodeURIComponent(params.code);
+  }
+  return s;
+}
+
 function App() {
   const initUrl: URL = new URL(window.location.href);
-  const params: URLSearchParams = initUrl.searchParams;
-  // get target key/value from URLSearchParams object
-  const url: string = params.has('url') ? decodeURI(params.get('url')) : '';
-  const value: string = params.has('code') ? decodeURI(params.get('code')) :
-    (url ? `-- loading from ${url}` : defaultValue);
+  const params: HashParams = parseHash(initUrl.hash);
 
   function changeUrl(newValue, key) {
-    params.set(key, encodeURI(newValue));
-    history.replaceState(undefined, undefined, '?' + params.toString());
+    params[key] = newValue;
+    // if we just loaded a url, wipe out the code param
+    if (key === 'url') { params.code = null; }
+    history.replaceState(undefined, undefined, paramsToString(params));
   }
 
   function clearUrlParam() {
-    params.delete('url');
-    history.replaceState(undefined, undefined, '?' + params.toString());
+    params.url = null;
+    history.replaceState(undefined, undefined, paramsToString(params));
   }
 
   const fn = monaco.Uri.file('test.lean').fsPath;
   return (
-    <LeanEditor file={fn} initialValue={value} onValueChange={(newValue) => changeUrl(newValue, 'code')}
-    initialUrl={url} onUrlChange={(newValue) => changeUrl(newValue, 'url')}
+    <LeanEditor file={fn} initialValue={params.code} onValueChange={(newValue) => changeUrl(newValue, 'code')}
+    initialUrl={params.url} onUrlChange={(newValue) => changeUrl(newValue, 'url')}
     clearUrlParam={clearUrlParam} />
   );
 }

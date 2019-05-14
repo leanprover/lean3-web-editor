@@ -46,64 +46,73 @@ const watchers = new Map<string, ModelWatcher>();
 export let delayMs = 1000;
 
 class ModelWatcher implements monaco.IDisposable {
-    private changeSubscription: monaco.IDisposable;
-    private syncTimer = new CoalescedTimer();
-    private version = 0;
+  private changeSubscription: monaco.IDisposable;
+  private syncTimer = new CoalescedTimer();
+  private version = 0;
 
-    constructor(private model: monaco.editor.IModel) {
-        this.changeSubscription = model.onDidChangeContent((e) => {
-            completionBuffer.cancel();
-            this.checkInputCompletion(e);
-            this.syncIn(delayMs);
-        });
-        this.syncNow();
-    }
+  constructor(private model: monaco.editor.IModel) {
+    this.changeSubscription = model.onDidChangeContent((e) => {
+      completionBuffer.cancel();
+      // this.checkInputCompletion(e);
+      this.syncIn(delayMs);
+    });
+    this.syncNow();
+  }
 
-    dispose() { this.changeSubscription.dispose(); }
+  dispose() { this.changeSubscription.dispose(); }
 
-    syncIn(ms: number) {
-        addToRunning(this.model.uri.fsPath);
-        completionBuffer.cancel();
-        const version = (this.version += 1);
-        this.syncTimer.do(ms, () => {
-            if (!server) {
-                return;
-            }
-            server.sync(this.model.uri.fsPath, this.model.getValue()).then(() => {
-              if (this.version === version) {
-                removeFromRunning(this.model.uri.fsPath);
-              }
-            });
-        });
-    }
-
-    syncNow() { this.syncIn(0); }
-
-    checkInputCompletion(e: monaco.editor.IModelContentChangedEvent) {
-      if (e.changes.length !== 1) {
+  syncIn(ms: number) {
+    addToRunning(this.model.uri.fsPath);
+    completionBuffer.cancel();
+    const version = (this.version += 1);
+    this.syncTimer.do(ms, () => {
+      if (!server) {
         return;
       }
-      const change = e.changes[0];
-      if (change.rangeLength === 0) {
-        if (change.text === ' ' || change.text === '\\') {
-          const lineNum = change.range.startLineNumber;
-          const line = this.model.getLineContent(change.range.startLineNumber);
-          const cursorPos = change.range.startColumn;
-          const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
-          const match = line.substring(index, cursorPos - 1);
-          const replaceText = translations[match];
-          if (index && replaceText) {
-            const range = new monaco.Range(lineNum, index, lineNum, cursorPos);
-            this.model.applyEdits([{
-              identifier: {major: 1, minor: 1},
-              range,
-              text: replaceText,
-              forceMoveMarkers: true,
-            }]);
-          }
+      server.sync(this.model.uri.fsPath, this.model.getValue()).then(() => {
+        if (this.version === version) {
+          removeFromRunning(this.model.uri.fsPath);
+        }
+      });
+    });
+  }
+
+  syncNow() { this.syncIn(0); }
+}
+
+const completeChars = new Set(" ,.(){}[]\\\'\":=");
+export function checkInputCompletion(e: monaco.editor.IModelContentChangedEvent,
+                                     editor: monaco.editor.IStandaloneCodeEditor,
+                                     model: monaco.editor.IModel): monaco.IPosition {
+  if (e.changes.length !== 1) {
+    return null;
+  }
+  const change = e.changes[0];
+  if (change.rangeLength === 0) {
+    if (completeChars.has(change.text)) {
+      const lineNum = change.range.startLineNumber;
+      const line = model.getLineContent(lineNum);
+      const cursorPos = change.range.startColumn;
+      let index = line.lastIndexOf('\\', cursorPos - 1) + 1;
+      if (change.text === '\\') {
+        index = line.lastIndexOf('\\', index - 2) + 1;
+      }
+      const match = line.substring(index, cursorPos - 1);
+      const replaceText = translations[match];
+      if (index && replaceText) {
+        const range = new monaco.Range(lineNum, index, lineNum, cursorPos);
+        const sel = editor.getSelections();
+        editor.setSelections(model.pushEditOperations(sel, [{
+          identifier: {major: 1, minor: 1},
+          range,
+          text: replaceText,
+          forceMoveMarkers: false,
+        }], () => [new monaco.Selection(lineNum, index, lineNum, index)]));
+        return new monaco.Position(lineNum, index + 2);
       }
     }
   }
+  return null;
 }
 
 class CompletionBuffer {

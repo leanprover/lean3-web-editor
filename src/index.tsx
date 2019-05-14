@@ -1,9 +1,10 @@
 /// <reference types="monaco-editor" />
 import { InfoRecord, LeanJsOpts, Message } from 'lean-client-js-browser';
 import * as React from 'react';
-import { findDOMNode, render } from 'react-dom';
+import { createPortal, findDOMNode, render } from 'react-dom';
 import * as sp from 'react-split-pane';
-import { allMessages, currentlyRunning, delayMs, registerLeanLanguage, server } from './langservice';
+import { allMessages, checkInputCompletion, currentlyRunning, delayMs,
+  registerLeanLanguage, server } from './langservice';
 export const SplitPane: any = sp;
 
 function leanColorize(text: string): string {
@@ -42,12 +43,12 @@ interface GoalWidgetProps {
 }
 function GoalWidget({goal, position}: GoalWidgetProps) {
   const tacticHeader = goal.text && <div className='info-header'>
-    tactic {<span style={{fontWeight: 'normal'}}> {goal.text} </span>}
+    tactic {<span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}> {goal.text} </span>}
     at {position.line}:{position.column}</div>;
   const docs = goal.doc && <ToggleDoc doc={goal.doc}/>;
 
   const typeHeader = goal.type && <div className='info-header'>
-    type {goal['full-id'] && <span> of <span style={{fontWeight: 'normal'}}>
+    type {goal['full-id'] && <span> of <span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}>
       {goal['full-id']}</span> </span>}
     at {position.line}:{position.column}</div>;
   const typeBody = (goal.type && !goal.text) // don't show type of tactics
@@ -234,8 +235,8 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
             Lean is {isRunning}
         </label>
         <div className='collapsible-content'><div className='leanheader'>
-          <img className='logo' src='./lean_logo.svg'
-          style={{height: '5em', margin: '1ex', paddingLeft: '1em', paddingRight: '1em'}}/>
+          <a href='https://leanprover.github.io'><img className='logo' src='./lean_logo.svg'
+          style={{height: '5em', margin: '1ex', paddingLeft: '1em', paddingRight: '1em'}}/></a>
           <div className='headerForms'>
             <UrlForm url={this.props.url} onSubmit={this.props.onSubmit}
             clearUrlParam={this.props.clearUrlParam}/>
@@ -246,11 +247,10 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
             <label className='logo' htmlFor='lean_upload'>Load .lean from disk:&nbsp;</label>
             <input id='lean_upload' type='file' accept='.lean' onChange={this.onFile}/>
             <div className='leanlink'>
+              <Modal />&nbsp;
               <span className='logo'>Live in-browser version of the </span>
-              <a href='https://leanprover.github.io/'>Lean
-                <span className='logo'> theorem prover</span>
+              <a href='https://leanprover.github.io/'>Lean theorem prover
               </a>
-              <span className='running'> on the go!</span>
               <span className='logo'>.</span>
             </div>
             {this.props.status}
@@ -300,6 +300,120 @@ class UrlForm extends React.Component<UrlFormProps, UrlFormState> {
   }
 }
 
+interface ModalState {
+  isOpen: boolean;
+}
+// https://assortment.io/posts/accessible-modal-component-react-portals-part-1 & 2
+// TODO: change focus back to button when modal closes
+class Modal extends React.Component<{}, ModalState> {
+  private modalNode: Node;
+  constructor(props) {
+    super(props);
+    this.state = {
+      isOpen: false,
+    };
+    this.open = this.open.bind(this);
+    this.close = this.close.bind(this);
+    this.keyDown = this.keyDown.bind(this);
+    this.clickAway = this.clickAway.bind(this);
+  }
+
+  open() {
+    this.setState({ isOpen: true }, () => {
+    });
+  }
+  close() {
+    this.setState({ isOpen: false });
+  }
+  keyDown({ keyCode }) {
+    return keyCode === 27 && this.close();
+  }
+  clickAway(e) {
+    if (this.modalNode && this.modalNode.contains(e.target)) { return; }
+    this.close();
+  }
+
+  render() {
+    return (
+      <React.Fragment>
+        <button className='modalButton' onClick={this.open}>?</button>
+        {this.state.isOpen &&
+        <ModalContent onClose={this.close} onKeyDown={this.keyDown} clickAway={this.clickAway}
+          modalRef={(n) => this.modalNode = n}/>}
+      </React.Fragment>
+    );
+  }
+}
+
+function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
+  return createPortal(
+    <aside className='c-modal-cover' tabIndex={-1} onClick={clickAway} onKeyDown={onKeyDown}>
+      <div className='c-modal' ref={modalRef}>
+        <h1>Lean web editor:</h1>
+        <button className='c-modal__close' onClick={onClose} autoFocus>
+          <span className='u-hide-visually'>Close</span>
+          <svg className='c-modal__close-icon' viewBox='0 0 40 40'>
+          <path d='M 10,10 L 30,30 M 30,10 L 10,30'></path></svg>
+        </button>
+        <div className='c-modal__body'>
+          <p>This page runs a WebAssembly or JavaScript version of <a href='https://leanprover.github.io'>Lean
+          3</a>, a theorem prover and programming language developed
+          at <a href='https://research.microsoft.com/'>Microsoft Research</a>.</p>
+
+          <h3>New to Lean?</h3>
+          <p>Please note that this editor is not really meant for serious use.
+          Most Lean users use the Lean VS Code or Emacs extensions to write proofs and programs.
+          There are good installation guides for Lean 3 and its standard library "mathlib"&nbsp;
+          <a href='https://github.com/leanprover-community/mathlib#installation'>here</a>.
+          The books <a href='https://leanprover.github.io/theorem_proving_in_lean'>Theorem Proving in Lean</a>
+          and <a href='https://leanprover.github.io/logic_and_proof/'>Logic and Proof</a> are reasonable places
+          to start learning Lean. If you have questions, drop by the&nbsp;
+          <a href='https://leanprover.zulipchat.com/#'>leanprover zulip chat</a>.</p>
+
+          <h3>Using this editor:</h3>
+          <p>Type Lean code into the editor panel or load and edit a .lean file from the web or your computer
+          using the input forms in the header.
+          If there are errors, warnings, or info messages, they will be underlined in red or green in the editor
+          and a message will be displayed in the info panel.</p>
+          <p>You can input unicode characters by entering "\" and then typing the corresponding code (see below)
+            and then typing a space or one of these characters: <span className='code-block'
+            style={{display: 'inline', background: '#ddd'}}>,.(){}[]\'":=</span>.</p>
+          <p>Here are a few common codes. Note that many other LaTeX commands will work as well:<br/>
+            "lam" for "λ", "t" (or "-&gt;" or "to") for "→", "l" (or "&lt;-") for "←", "u" for "↑", "d" for "↓",
+            "in" for "∈", "and" for "∧", "or" for "∨", "x" for "×",
+            "le" and "ge" (or "&lt;=" and "&gt;=") for "≤" and "≥",
+            "&lt;" and "&gt;" for "⟨" and "⟩",
+            "ne" for "≠", "nat" for "ℕ", "not" for "¬", "int" for "ℤ",<br/>
+            (For full details,
+            see <a href='https://github.com/bryangingechen/lean-web-editor/blob/ui/src/translations.json'>this
+              list</a>.)</p>
+          <p>To see the type of a term, hover over it to see a popup, or place your cursor in the text to
+          view the type and / or docstring in the info panel
+          (on the right, or below, depending on your browser's aspect ratio).</p>
+          <p>Click the colored bar to show / hide the header UI.</p>
+          <p>Drag the separating line between the editor panel and info panels to adjust their relative sizes.</p>
+
+          <p>This page is running the Emscripten build of
+          the <a href='https://github.com/leanprover-community/lean'>"community" fork</a> of Lean 3.
+          It also loads the <a href='https://github.com/leanprover-community/mathlib'>mathlib</a>,&nbsp;
+          <a href='https://github.com/leanprover/super'>super</a> and&nbsp;
+          <a href='https://github.com/leanprover/mini_crush'>mini-crush</a> packages.</p>
+          {/* TODO: show precise commits in library.zip here somehow? */}
+          <h3>About this editor:</h3>
+          <p><a href='https://github.com/bryangingechen/lean-web-editor/tree/ui'>This editor</a> is a fork of the
+          original <a href='https://leanprover.github.io/live'>lean-web-editor</a> app
+          (written in typescript+react and using the Monaco
+          editor; see the original github repository <a href='https://github.com/leanprover/lean-web-editor'>here</a>).
+          This page also uses <a href='https://github.com/bryangingechen/tree/cache'>a forked version</a> of
+          the <a href='https://github.com/leanprover/lean-client-js'>lean-client-browser</a> package
+          that caches the library.zip file
+          in <a href='https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API'>IndexedDB</a>.</p>
+        </div>
+      </div>
+    </aside>,
+  document.body);
+}
+
 interface LeanEditorProps {
   file: string;
   initialValue: string;
@@ -319,7 +433,7 @@ interface LeanEditorState {
 class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   model: monaco.editor.IModel;
   editor: monaco.editor.IStandaloneCodeEditor;
-
+  private newCursor: monaco.IPosition;
   constructor(props: LeanEditorProps) {
     super(props);
     this.state = {
@@ -330,9 +444,11 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       checked: true,
     };
     this.model = monaco.editor.createModel(this.props.initialValue, 'lean', monaco.Uri.file(this.props.file));
-    this.model.onDidChangeContent((e) =>
-      this.props.onValueChange &&
-      this.props.onValueChange(this.model.getValue()));
+    this.model.onDidChangeContent((e) => {
+      this.newCursor = checkInputCompletion(e, this.editor, this.model);
+      return this.props.onValueChange &&
+        this.props.onValueChange(this.model.getValue());
+    });
 
     this.updateDimensions = this.updateDimensions.bind(this);
     this.dragFinished = this.dragFinished.bind(this);
@@ -357,8 +473,16 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       scrollBeyondLastLine: false,
     };
     this.editor = monaco.editor.create(node, options);
-    this.editor.onDidChangeCursorPosition((e) =>
-      this.setState({cursor: {line: e.position.lineNumber, column: e.position.column - 1}}));
+    this.editor.onDidChangeCursorPosition((e) => {
+      if (this.newCursor) {
+        // setting position to this.newCursor without nullifying leads to a loop
+        const tempCursor = this.newCursor;
+        this.newCursor = null;
+        this.editor.setPosition(tempCursor);
+        return;
+      }
+      this.setState({cursor: {line: e.position.lineNumber, column: e.position.column - 1}});
+    });
 
     this.determineSplit();
     window.addEventListener('resize', this.updateDimensions);
@@ -456,7 +580,13 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
 }
 
 const defaultValue =
-  '-- Live javascript version of Lean\n\nexample (m n : ℕ) : m + n = n + m :=\nby simp';
+`-- Live ${(self as any).WebAssembly ? 'WebAssembly' : 'JavaScript'} version of Lean
+#eval let v := lean.version in let s := lean.special_version_desc in string.join
+["Lean (version ", v.1.repr, ".", v.2.1.repr, ".", v.2.2.repr, ", ",
+if s ≠ "" then s ++ ", " else s, "commit ", (lean.githash.to_list.take 12).as_string, ")"]
+
+example (m n : ℕ) : m + n = n + m :=
+by simp`;
 
 function App() {
   const initUrl: URL = new URL(window.location.href);

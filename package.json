@@ -10,13 +10,13 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@types/node": "^9.4.6",
-    "@types/react": "16.0.38",
-    "@types/react-dom": "16.0.4",
+    "@types/react": "16.8.17",
+    "@types/react-dom": "16.8.0",
     "ajv": "^6.10.0",
     "lean-client-js-browser": "^1.2.12",
     "monaco-editor": "0.10.1",
     "react": "16.2.0",
-    "react-dom": "16.2.0",
+    "react-dom": "16.2.1",
     "react-split-pane": "0.1.77"
   },
   "devDependencies": {

@@ -80,7 +80,7 @@ class ModelWatcher implements monaco.IDisposable {
   syncNow() { this.syncIn(0); }
 }
 
-const completeChars = new Set(" ,.(){}[]\\\'\":=");
+const completeChars = new Set(' ,');
 export function checkInputCompletion(e: monaco.editor.IModelContentChangedEvent,
                                      editor: monaco.editor.IStandaloneCodeEditor,
                                      model: monaco.editor.IModel): monaco.IPosition {
@@ -93,10 +93,10 @@ export function checkInputCompletion(e: monaco.editor.IModelContentChangedEvent,
       const lineNum = change.range.startLineNumber;
       const line = model.getLineContent(lineNum);
       const cursorPos = change.range.startColumn;
-      let index = line.lastIndexOf('\\', cursorPos - 1) + 1;
-      if (change.text === '\\') {
-        index = line.lastIndexOf('\\', index - 2) + 1;
-      }
+      const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
+      // if (change.text === '\\') {
+      //   index = line.lastIndexOf('\\', index - 2) + 1;
+      // }
       const match = line.substring(index, cursorPos - 1);
       const replaceText = translations[match];
       if (index && replaceText) {

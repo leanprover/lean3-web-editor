@@ -376,8 +376,7 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           If there are errors, warnings, or info messages, they will be underlined in red or green in the editor
           and a message will be displayed in the info panel.</p>
           <p>You can input unicode characters by entering "\" and then typing the corresponding code (see below)
-            and then typing a space or one of these characters: <span className='code-block'
-            style={{display: 'inline', background: '#ddd'}}>,.(){}[]\'":=</span>.</p>
+            and then typing a space or a comma.</p>
           <p>Here are a few common codes. Note that many other LaTeX commands will work as well:<br/>
             "lam" for "λ", "t" (or "-&gt;" or "to") for "→", "l" (or "&lt;-") for "←", "u" for "↑", "d" for "↓",
             "in" for "∈", "and" for "∧", "or" for "∨", "x" for "×",

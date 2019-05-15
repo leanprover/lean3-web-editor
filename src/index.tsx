@@ -43,14 +43,14 @@ interface GoalWidgetProps {
 }
 function GoalWidget({goal, position}: GoalWidgetProps) {
   const tacticHeader = goal.text && <div className='info-header'>
-    tactic {<span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}> {goal.text} </span>}
-    at {position.line}:{position.column}</div>;
+    tactic {<span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}>{goal.text}</span>}
+    &nbsp;at {position.line}:{position.column}</div>;
   const docs = goal.doc && <ToggleDoc doc={goal.doc}/>;
 
   const typeHeader = goal.type && <div className='info-header'>
     type {goal['full-id'] && <span> of <span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}>
-      {goal['full-id']}</span> </span>}
-    at {position.line}:{position.column}</div>;
+      {goal['full-id']}</span></span>}
+    &nbsp;at {position.line}:{position.column}</div>;
   const typeBody = (goal.type && !goal.text) // don't show type of tactics
     && <div className='code-block'
     dangerouslySetInnerHTML={{__html: leanColorize(goal.type) + (!goal.doc && '<br />')}}/>;

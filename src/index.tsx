@@ -114,7 +114,10 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   componentWillMount() {
     this.updateMessages(this.props);
     this.subscriptions.push(
-      server.allMessages.on((allMsgs) => this.updateMessages(this.props)),
+      server.allMessages.on((allMsgs) => {
+        this.updateMessages(this.props);
+        this.refreshGoal(this.props);
+      }),
     );
   }
   componentWillUnmount() {
@@ -365,7 +368,7 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           Most Lean users use the Lean VS Code or Emacs extensions to write proofs and programs.
           There are good installation guides for Lean 3 and its standard library "mathlib"&nbsp;
           <a href='https://github.com/leanprover-community/mathlib#installation'>here</a>.
-          The books <a href='https://leanprover.github.io/theorem_proving_in_lean'>Theorem Proving in Lean</a>
+          The books <a href='https://leanprover.github.io/theorem_proving_in_lean'>Theorem Proving in Lean</a>&nbsp;
           and <a href='https://leanprover.github.io/logic_and_proof/'>Logic and Proof</a> are reasonable places
           to start learning Lean. If you have questions, drop by the&nbsp;
           <a href='https://leanprover.zulipchat.com/#'>leanprover zulip chat</a>.</p>
@@ -407,6 +410,13 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           the <a href='https://github.com/leanprover/lean-client-js'>lean-client-browser</a> package
           that caches the library.zip file
           in <a href='https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API'>IndexedDB</a>.</p>
+          <h3>Debug settings:</h3>
+          <p><input id='logToConsole' type='checkbox' defaultChecked={server.logMessagesToConsole} onChange={(e) => {
+            server.logMessagesToConsole = e.target.checked;
+            console.log(`server logging ${server.logMessagesToConsole ?
+              'start' : 'end'}ed!`);
+          }}/> <label htmlFor='logToConsole'>
+            Log server messages to console</label></p>
         </div>
       </div>
     </aside>,
@@ -445,10 +455,11 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
     this.model = monaco.editor.createModel(this.props.initialValue, 'lean', monaco.Uri.file(this.props.file));
     this.model.onDidChangeContent((e) => {
       this.newCursor = checkInputCompletion(e, this.editor, this.model);
+      const val = this.model.getValue();
       // do not change code URL param unless user has actually typed
       // (this makes the #url=... param a little more "sticky")
-      return !e.isFlush && this.props.onValueChange &&
-        this.props.onValueChange(this.model.getValue());
+      return (!e.isFlush || !val) && this.props.onValueChange &&
+        this.props.onValueChange(val);
     });
 
     this.updateDimensions = this.updateDimensions.bind(this);
@@ -602,7 +613,7 @@ function parseHash(hash: string): HashParams {
   return { url, code };
 }
 function paramsToString(params: HashParams): string {
-  let s: string;
+  let s = '#';
   if (params.url) {
     s = '#url=' + encodeURIComponent(params.url);
   }
@@ -621,7 +632,7 @@ function App() {
   function changeUrl(newValue, key) {
     params[key] = newValue;
     // if we just loaded a url, wipe out the code param
-    if (key === 'url') { params.code = null; }
+    if (key === 'url' || !newValue) { params.code = null; }
     history.replaceState(undefined, undefined, paramsToString(params));
   }
 

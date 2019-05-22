@@ -27,9 +27,18 @@ module.exports = {
     module: {
         rules: [
             {
+                test: /webworkerscript\.js$/,
+                use: { loader:'worker-loader' },
+            },
+            {
                 test: /\.tsx?$/,
                 loader: [
-                    'babel-loader?presets[]=env',
+    // To use babel in lean-client-js-browser, add the following to this package.json
+    // "babel-core": "^6.26.3",
+    // "babel-loader": "^7.1.2",
+    // "babel-polyfill": "^6.26.0",
+    // "babel-preset-env": "^1.7.0",
+                    // 'babel-loader?presets[]=env',
                     'ts-loader'
                 ],
             },

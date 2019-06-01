@@ -113,10 +113,14 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   }
   componentWillMount() {
     this.updateMessages(this.props);
+    let timer = null; // debounce
     this.subscriptions.push(
       server.allMessages.on((allMsgs) => {
-        this.updateMessages(this.props);
-        this.refreshGoal(this.props);
+        if (timer) { clearTimeout(timer); }
+        timer = setTimeout(() => {
+          this.updateMessages(this.props);
+          this.refreshGoal(this.props);
+        }, 100);
       }),
     );
   }

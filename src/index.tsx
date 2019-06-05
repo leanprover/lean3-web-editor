@@ -61,12 +61,13 @@ function GoalWidget({goal, position}: GoalWidgetProps) {
     dangerouslySetInnerHTML={{__html: leanColorize(goal.state)}}/>;
 
   return (
+    // put tactic state first so that there's less jumping around when the cursor moves
     <div style={{paddingBottom: '1em'}}>
+    {goalStateHeader}
+    {goalStateBody}
     {tacticHeader || typeHeader}
     {typeBody}
     {docs}
-    {goalStateHeader}
-    {goalStateBody}
     </div>
   );
 }

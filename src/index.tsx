@@ -169,7 +169,8 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
         <img src='./lean_logo.svg' style={{height: '100%', float: 'left', paddingLeft: '1em', paddingRight: '3em'}}/>
         <div style={{padding: '1em'}}>
           <div style={{fontSize: '80%'}}>
-            Live in-browser version of the <a href='https://leanprover.github.io/'>Lean theorem prover</a>.
+            Live in-browser version of the <a href='https://leanprover.github.io/'>Lean theorem prover</a>.<br/>
+            Blank right side pane means the proof checks out ok.
           </div>
           {isRunning}
         </div>
@@ -258,7 +259,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
 }
 
 const defaultValue =
-  '-- Live javascript version of Lean\n\nexample (m n : ℕ) : m + n = n + m :=\nby simp';
+  '-- An example proof in Lean\n\nexample (m n : ℕ) : m + n = n + m :=\nby simp';
 
 function App() {
   let value = defaultValue;

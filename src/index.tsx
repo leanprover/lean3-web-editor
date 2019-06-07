@@ -43,31 +43,31 @@ interface GoalWidgetProps {
 }
 function GoalWidget({goal, position}: GoalWidgetProps) {
   const tacticHeader = goal.text && <div className='info-header'>
-    tactic {<span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}>{goal.text}</span>}
-    &nbsp;at {position.line}:{position.column}</div>;
+    {position.line}:{position.column}: tactic {
+      <span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}>{goal.text}</span>}</div>;
   const docs = goal.doc && <ToggleDoc doc={goal.doc}/>;
 
   const typeHeader = goal.type && <div className='info-header'>
-    type {goal['full-id'] && <span> of <span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}>
-      {goal['full-id']}</span></span>}
-    &nbsp;at {position.line}:{position.column}</div>;
+    {position.line}:{position.column}: type {
+      goal['full-id'] && <span> of <span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}>
+      {goal['full-id']}</span></span>}</div>;
   const typeBody = (goal.type && !goal.text) // don't show type of tactics
     && <div className='code-block'
     dangerouslySetInnerHTML={{__html: leanColorize(goal.type) + (!goal.doc && '<br />')}}/>;
 
   const goalStateHeader = goal.state && <div className='info-header'>
-    goal at {position.line}:{position.column}</div>;
+    {position.line}:{position.column}: goal</div>;
   const goalStateBody = goal.state && <div className='code-block'
-    dangerouslySetInnerHTML={{__html: leanColorize(goal.state)}}/>;
+    dangerouslySetInnerHTML={{__html: leanColorize(goal.state) + '<br/>'}} />;
 
   return (
     // put tactic state first so that there's less jumping around when the cursor moves
-    <div style={{paddingBottom: '1em'}}>
-    {goalStateHeader}
-    {goalStateBody}
-    {tacticHeader || typeHeader}
-    {typeBody}
-    {docs}
+    <div>
+      {goalStateHeader}
+      {goalStateBody}
+      {tacticHeader || typeHeader}
+      {typeBody}
+      {docs}
     </div>
   );
 }
@@ -92,9 +92,15 @@ class ToggleDoc extends React.Component<ToggleDocProps, ToggleDocState> {
       {this.state.showDoc ?
         this.props.doc : // TODO: markdown / highlighting?
         <span>{this.props.doc.slice(0, 75)} <span style={{color: '#246'}}>[...]</span></span>}
-      <br/><br/>
+        <br/>
+        <br/>
     </div>;
   }
+}
+
+enum DisplayMode {
+  OnlyState, // only the state at the current cursor position including the tactic state
+  AllMessage, // all messages
 }
 
 interface InfoViewProps {
@@ -104,13 +110,17 @@ interface InfoViewProps {
 interface InfoViewState {
   goal?: GoalWidgetProps;
   messages: Message[];
+  displayMode: DisplayMode;
 }
 class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   private subscriptions: monaco.IDisposable[] = [];
 
   constructor(props: InfoViewProps) {
     super(props);
-    this.state = { messages: [] };
+    this.state = {
+      messages: [],
+      displayMode: DisplayMode.OnlyState,
+    };
   }
   componentWillMount() {
     this.updateMessages(this.props);
@@ -158,11 +168,29 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
   }
 
   render() {
-    const goal = this.state.goal && (<div key={'goal'}>{GoalWidget(this.state.goal)}</div>);
-    const msgs = this.state.messages.map((msg, i) =>
+    const goal = (this.state.displayMode === DisplayMode.OnlyState) &&
+      this.state.goal &&
+      (<div key={'goal'}>{GoalWidget(this.state.goal)}</div>);
+    const filteredMsgs = (this.state.displayMode === DisplayMode.AllMessage) ?
+      this.state.messages :
+      this.state.messages.filter(({pos_line}) => this.props.cursor &&
+        (pos_line === this.props.cursor.line));
+    const msgs = filteredMsgs.map((msg, i) =>
       (<div key={i}>{MessageWidget({msg})}</div>));
     return (
       <div style={{overflow: 'auto', height: '100%'}}>
+        <div className='infoview-buttons'>
+          <img src='./display-goal-light.svg' title='Display Goal'
+            style={{opacity: (this.state.displayMode === DisplayMode.OnlyState ? 1 : 0.25)}}
+            onClick={() => {
+              this.setState({ displayMode: DisplayMode.OnlyState });
+            }}/>
+          <img src='./display-list-light.svg' title='Display Messages'
+            style={{opacity: (this.state.displayMode === DisplayMode.AllMessage ? 1 : 0.25)}}
+            onClick={() => {
+              this.setState({ displayMode: DisplayMode.AllMessage });
+            }}/>
+        </div>
         {goal}
         {msgs}
       </div>

@@ -196,7 +196,7 @@ export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
           endLineNumber: msg.pos_line,
           endColumn: msg.pos_col + 1,
         };
-        if (msg.end_pos_line && msg.end_pos_col) {
+        if (msg.end_pos_line && msg.end_pos_col !== undefined) {
           marker.endLineNumber = msg.end_pos_line;
           marker.endColumn = msg.end_pos_col + 1;
         }

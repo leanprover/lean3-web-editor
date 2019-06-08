@@ -173,8 +173,14 @@ class InfoView extends React.Component<InfoViewProps, InfoViewState> {
       (<div key={'goal'}>{GoalWidget(this.state.goal)}</div>);
     const filteredMsgs = (this.state.displayMode === DisplayMode.AllMessage) ?
       this.state.messages :
-      this.state.messages.filter(({pos_line}) => this.props.cursor &&
-        (pos_line === this.props.cursor.line));
+      this.state.messages.filter(({pos_col, pos_line, end_pos_col, end_pos_line}) => {
+        if (!this.props.cursor) { return false; }
+        const {line, column} = this.props.cursor;
+        return pos_line <= line &&
+          ((!end_pos_line && line === pos_line) || line <= end_pos_line) &&
+          (line !== pos_line || pos_col <= column) &&
+          (line !== end_pos_line || end_pos_col >= column);
+      });
     const msgs = filteredMsgs.map((msg, i) =>
       (<div key={i}>{MessageWidget({msg})}</div>));
     return (

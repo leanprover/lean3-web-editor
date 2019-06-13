@@ -654,12 +654,14 @@ function parseHash(hash: string): HashParams {
 function paramsToString(params: HashParams): string {
   let s = '#';
   if (params.url) {
-    s = '#url=' + encodeURIComponent(params.url);
+    s = '#url=' + encodeURIComponent(params.url)
+      .replace(/\(/g, '%28').replace(/\)/g, '%29');
   }
   // nonempty params.code will wipe out params.url
   if (params.code) {
     params.url = null;
-    s = '#code=' + encodeURIComponent(params.code);
+    s = '#code=' + encodeURIComponent(params.code)
+      .replace(/\(/g, '%28').replace(/\)/g, '%29');
   }
   return s;
 }

@@ -53,7 +53,11 @@ with zipfile.ZipFile(library_zip_fn, mode='w', compression=zipfile.ZIP_DEFLATED,
             num_olean[lib_name] = 0
         for fn in p.glob('**/*.olean'):
             rel = fn.relative_to(p)
+            # ignore transitive dependencies
             if '_target' in rel.parts:
+                continue
+            # ignore olean files from deleted / renamed lean files
+            if not fn.with_suffix('.lean').is_file():
                 continue
             elif rel in already_seen:
                 print('duplicate: {0}'.format(fn))

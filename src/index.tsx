@@ -456,6 +456,19 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
               'start' : 'end'}ed!`);
           }}/> <label htmlFor='logToConsole'>
             Log server messages to console</label></p>
+          <p><button onClick={(e) => {
+            const req = indexedDB.deleteDatabase('leanlibrary');
+            req.onsuccess = () => {
+              console.log('Deleted leanlibrary successfully');
+              location.reload(true);
+            };
+            req.onerror = () => {
+              console.log("Couldn't delete leanlibrary");
+            };
+            req.onblocked = () => {
+              console.log("Couldn't delete leanlibrary due to the operation being blocked");
+            };
+          }}>Clear library cache and refresh</button></p>
         </div>
       </div>
     </aside>,

@@ -28,7 +28,11 @@ Then copy the `./dist` directory wherever you want.
 
 If you want to include custom libraries, then you need to build a suitable `library.zip` file yourself.
 
-1. Change `combined_lib/leanpkg.toml` to include the libraries you want. If necessary, edit `lean_version` to point to the version of Lean that corresponds to the version of Lean built with Emscripten above.
-2. Run `./mk_library.py` to create `dist/library.zip` (requires Python 3.5 or greater). Type `./mk_library.py -h` for information about command-line options. This script will also generate a pair of `.json` files which are used by `lean-client-js-browser`:
-  - `dist/library.info.json` contains github URL prefixes to the precise commits of the Lean packages contained in `library.zip` and is used for caching,
-  - `dist/library.olean_map.json` is used to help resolve references to individual `.lean` files returned by the Lean server to their URLs on github.
+1. Install Lean 3. If you plan to use the prebuilt JS/WASM versions of Lean, I recommend using [`elan`](https://github.com/kha/elan) to install the latest community version using the command
+`elan toolchain install leanprover-community/lean:nightly`. If you then check `elan show`, you should see a new toolchain with the name: `leanprover-community-lean-nightly`.
+2. Edit `combined_lib/leanpkg.toml`:
+    - `lean_version` needs to point to the same version of Lean as the Emscripten build of Lean you plan to use. If you've installed the community nightly with `elan` as above, then you'll want that line to read `lean_version = "leanprover-community-lean-nightly"`.
+    - Add the libraries you want to bundle to the `[dependencies]` section. You can use either `leanpkg add` or enter them manually with the format `mathlib = {git = "https://github.com/leanprover/mathlib", rev = "0c627fb3535d14955b2c2a24805b7cf473b4202f"}`.
+4. Run `./mk_library.py` (requires Python 3.5 or greater) to create the ZIP bundle (placed at `dist/library.zip` by default). Type `./mk_library.py -h` for information about command-line options. This script will also generate a pair of `.json` files which are used by `lean-client-js-browser`:
+    - `dist/library.info.json` contains github URL prefixes to the precise commits of the Lean packages contained in `library.zip` and is used for caching,
+    - `dist/library.olean_map.json` is used to help resolve references to individual `.lean` files returned by the Lean server to their URLs on github.

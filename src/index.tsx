@@ -388,6 +388,24 @@ class Modal extends React.Component<{}, ModalState> {
 }
 
 function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
+  const libinfo = [];
+  if (info) {
+    for (const k in info) {
+      if (info.hasOwnProperty(k)) {
+        const v = info[k];
+        const urlArray = v.slice(34).split('/').slice(0, 3);
+        const commit = urlArray[2].slice(0, 8);
+        urlArray.unshift('https://github.com');
+        urlArray.splice(3, 0, 'tree');
+        const url = urlArray.join('/');
+        libinfo.push(<div key={libinfo.length - 1} className='code-block'
+          style={{fontWeight: 'normal'}}>
+          {k} : <a href={url}>{commit}</a>
+          </div>);
+      }
+    }
+  }
+
   return createPortal(
     <aside className='c-modal-cover' tabIndex={-1} onClick={clickAway} onKeyDown={onKeyDown}>
       <div className='c-modal' ref={modalRef}>
@@ -449,6 +467,8 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           the <a href='https://github.com/leanprover/lean-client-js'>lean-client-browser</a> package
           that caches the library.zip file
           in <a href='https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API'>IndexedDB</a>.</p>
+          <h3>Lean packages in library.zip:</h3>
+          {libinfo}
           <h3>Debug settings:</h3>
           <p><input id='logToConsole' type='checkbox' defaultChecked={server.logMessagesToConsole} onChange={(e) => {
             server.logMessagesToConsole = e.target.checked;
@@ -709,6 +729,11 @@ const leanJsOpts: LeanJsOpts = {
   webassemblyJs: './lean_js_wasm.js',
   webassemblyWasm: './lean_js_wasm.wasm',
 };
+
+let info = null;
+const metaPromise = fetch('./library.info.json')
+  .then((res) => res.json())
+  .then((j) => info = j);
 
 // tslint:disable-next-line:no-var-requires
 (window as any).require(['vs/editor/editor.main'], () => {

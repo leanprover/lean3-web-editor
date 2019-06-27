@@ -723,15 +723,17 @@ function App() {
   );
 }
 
+const hostPrefix = './'; // 'https://tqft.net/lean/web-editor/';
+
 const leanJsOpts: LeanJsOpts = {
-  javascript: './lean_js_js.js',
-  libraryZip: './library.zip',
-  webassemblyJs: './lean_js_wasm.js',
-  webassemblyWasm: './lean_js_wasm.wasm',
+  javascript: hostPrefix + 'lean_js_js.js',
+  libraryZip: hostPrefix + 'library.zip',
+  webassemblyJs: hostPrefix + 'lean_js_wasm.js',
+  webassemblyWasm: hostPrefix + 'lean_js_wasm.wasm',
 };
 
 let info = null;
-const metaPromise = fetch('./library.info.json')
+const metaPromise = fetch(leanJsOpts.libraryZip.slice(0, -3) + 'info.json')
   .then((res) => res.json())
   .then((j) => info = j);
 

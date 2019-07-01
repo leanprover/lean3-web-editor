@@ -438,13 +438,13 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           <p>You can input unicode characters by entering "\" and then typing the corresponding code (see below)
             and then typing a space or a comma.</p>
           <p>Here are a few common codes. Note that many other LaTeX commands will work as well:<br/>
-            "lam" for "λ", "t" (or "-&gt;" or "to") for "→", "l" (or "&lt;-") for "←", "u" for "↑", "d" for "↓",
+            "lam" for "λ", "to" (or "-&gt;") for "→", "l" (or "&lt;-") for "←", "u" for "↑", "d" for "↓",
             "in" for "∈", "and" for "∧", "or" for "∨", "x" for "×",
             "le" and "ge" (or "&lt;=" and "&gt;=") for "≤" and "≥",
             "&lt;" and "&gt;" for "⟨" and "⟩",
             "ne" for "≠", "nat" for "ℕ", "not" for "¬", "int" for "ℤ",<br/>
             (For full details,
-            see <a href='https://github.com/bryangingechen/lean-web-editor/blob/ui/src/translations.json'>this
+            see <a href='https://github.com/leanprover/vscode-lean/blob/master/translations.json'>this
               list</a>.)</p>
           <p>To see the type of a term, hover over it to see a popup, or place your cursor in the text to
           view the type and / or docstring in the info panel

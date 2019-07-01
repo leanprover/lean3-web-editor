@@ -295,7 +295,17 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
               </a>
               <span className='logo'>.</span>
             </div>
-            {this.props.status}
+            {this.props.status &&
+              (<span style={{color: 'red'}}>
+                Could not fetch (error: {this.props.status})!&nbsp;
+                {this.props.status.startsWith('TypeError') && (<span>
+                  If you see <a href='https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS'>
+                  cross-origin (CORS) errors
+                </a> in your browser's dev console, try <a href='https://cors-anywhere.herokuapp.com/'>
+                  a CORS proxy
+                </a>, e.g. prepend https://cors-anywhere.herokuapp.com/ to the beginning of your URL.
+                  </span>)}
+              </span>)}
           </div>
         </div></div>
       </div>
@@ -579,16 +589,12 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   componentDidUpdate() {
     // if state url is not null, fetch, then set state url to null again
     if (this.state.url) {
-      try {
-        fetch(this.state.url).then((s) => s.text())
-          .then((s) => {
-            this.model.setValue(s);
-            this.setState({ status: null });
-          });
-      } catch (e) {
-        // won't show CORS errors, also 404's etc. don't qualify as errors
-        this.setState({ status: e.toString() });
-      }
+      fetch(this.state.url).then((s) => s.text())
+        .then((s) => {
+          this.model.setValue(s);
+          this.setState({ status: null });
+        })
+        .catch((e) => this.setState({ status: e.toString() }));
       this.setState({ url: null });
     }
   }

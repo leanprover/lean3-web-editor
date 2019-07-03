@@ -14,6 +14,7 @@ parser.add_argument('-c', action='store_true',
 
 args = parser.parse_args()
 combined_lib = args.i
+combined_lib_path = str(Path(combined_lib).resolve()) + '/src'
 library_zip_fn = str(Path(args.o).resolve())
 
 if not args.c:
@@ -35,17 +36,25 @@ already_seen = set()
 lib_info = {}
 oleans = {}
 num_olean = {}
+Path(library_zip_fn).parent.mkdir(parents=True, exist_ok=True)
 with zipfile.ZipFile(library_zip_fn, mode='w', compression=zipfile.ZIP_DEFLATED, allowZip64=False, compresslevel=9) as zf:
     for p in lean_path:
         parts = p.parts
-        if parts[-1] != 'library':
+        if str(p.resolve()) == combined_lib_path: # if using combined_lib/src
+            lib_name = parts[-2]
+            lib_info[lib_name] = '/library/' + lib_name
+        elif parts[-1] != 'library':
             lib_name = parts[-2] # assume lean_path contains _target/deps/name/src
             git_dir = str(p.parent)+'/.git'
             lib_rev = subprocess.run(['git', '--git-dir='+git_dir, 'rev-parse', 'HEAD'], capture_output=True, encoding="utf-8").stdout.rstrip()
             lib_repo_url = subprocess.run(['git', '--git-dir='+git_dir, 'config', '--get', 'remote.origin.url'], capture_output=True, encoding="utf-8").stdout.rstrip()
             # assume that repos are hosted at github
-            lib_repo = re.search(r'github\.com[:/]([^\.]*)', lib_repo_url).group(1)
-            lib_info[lib_name] = 'https://raw.githubusercontent.com/{0}/{1}/src/'.format(lib_repo, lib_rev)
+            lib_repo_match = re.search(r'github\.com[:/]([^\.]*)', lib_repo_url)
+            if lib_repo_match:
+                lib_repo = lib_repo_match.group(1)
+                lib_info[lib_name] = 'https://raw.githubusercontent.com/{0}/{1}/src/'.format(lib_repo, lib_rev)
+            else:
+                lib_info[lib_name] = lib_repo_url
         else:
             lib_name = core_name
             lib_info[lib_name] = core_url

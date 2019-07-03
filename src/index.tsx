@@ -403,15 +403,22 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
     for (const k in info) {
       if (info.hasOwnProperty(k)) {
         const v = info[k];
-        const urlArray = v.slice(34).split('/').slice(0, 3);
-        const commit = urlArray[2].slice(0, 8);
-        urlArray.unshift('https://github.com');
-        urlArray.splice(3, 0, 'tree');
-        const url = urlArray.join('/');
-        libinfo.push(<div key={libinfo.length - 1} className='code-block'
+        if (v.match(/https:\/\/github\.com/)) {
+          const urlArray = v.slice(34).split('/').slice(0, 3);
+          const commit = urlArray[2].slice(0, 8);
+          urlArray.unshift('https://github.com');
+          urlArray.splice(3, 0, 'tree');
+          const url = urlArray.join('/');
+          libinfo.push(<div key={libinfo.length - 1} className='code-block'
+            style={{fontWeight: 'normal'}}>
+            {k} : <a href={url}>{commit}</a>
+            </div>);
+        } else {
+          libinfo.push(<div key={libinfo.length - 1} className='code-block'
           style={{fontWeight: 'normal'}}>
-          {k} : <a href={url}>{commit}</a>
+          {k} : {v}
           </div>);
+        }
       }
     }
   }

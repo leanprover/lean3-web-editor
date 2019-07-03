@@ -53,8 +53,10 @@ with zipfile.ZipFile(library_zip_fn, mode='w', compression=zipfile.ZIP_DEFLATED,
             if lib_repo_match:
                 lib_repo = lib_repo_match.group(1)
                 lib_info[lib_name] = 'https://raw.githubusercontent.com/{0}/{1}/src/'.format(lib_repo, lib_rev)
-            else:
+            elif lib_repo_url:
                 lib_info[lib_name] = lib_repo_url
+            else:
+                lib_info[lib_name] = '/library/' + lib_name
         else:
             lib_name = core_name
             lib_info[lib_name] = core_url

@@ -403,7 +403,7 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
     for (const k in info) {
       if (info.hasOwnProperty(k)) {
         const v = info[k];
-        if (v.match(/https:\/\/github\.com/)) {
+        if (v.match(/^https:\/\/raw\.githubusercontent\.com/)) {
           const urlArray = v.slice(34).split('/').slice(0, 3);
           const commit = urlArray[2].slice(0, 8);
           urlArray.unshift('https://github.com');
@@ -736,7 +736,8 @@ function App() {
   );
 }
 
-const hostPrefix = './'; // 'https://tqft.net/lean/web-editor/';
+const hostPrefix = './';
+// const hostPrefix = 'https://tqft.net/lean/web-editor/';
 
 const leanJsOpts: LeanJsOpts = {
   javascript: hostPrefix + 'lean_js_js.js',

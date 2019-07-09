@@ -210,7 +210,7 @@ interface PageHeaderProps {
   onSubmit: (value: string) => void;
   status: string;
   onSave: () => void;
-  onLoad: (localFile: string) => void;
+  onLoad: (localFile: string, lastFileName: string) => void;
   clearUrlParam: () => void;
   onChecked: () => void;
 }
@@ -253,7 +253,7 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
     const reader = new FileReader();
     const file = e.target.files[0];
     reader.readAsText(file);
-    reader.onload = () => this.props.onLoad(reader.result as string);
+    reader.onload = () => this.props.onLoad(reader.result as string, file.name);
     this.props.clearUrlParam();
   }
 
@@ -264,7 +264,7 @@ class PageHeader extends React.Component<PageHeaderProps, PageHeaderState> {
   // }
 
   render() {
-    const isRunning = this.state.currentlyRunning ? 'running...' : 'ready!';
+    const isRunning = this.state.currentlyRunning ? 'busy...' : 'ready!';
     const runColor = this.state.currentlyRunning ? 'orange' : 'lightgreen';
     // TODO: add input for delayMs
     // checkbox for console spam
@@ -398,7 +398,7 @@ class Modal extends React.Component<{}, ModalState> {
 }
 
 function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
-  const libinfo = [];
+  const libinfo = []; // populated with info about included libraries
   if (info) {
     for (const k in info) {
       if (info.hasOwnProperty(k)) {
@@ -527,6 +527,7 @@ interface LeanEditorState {
   status: string;
   size: number;
   checked: boolean;
+  lastFileName: string;
 }
 class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   model: monaco.editor.IModel;
@@ -540,6 +541,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       status: null,
       size: null,
       checked: true,
+      lastFileName: this.props.file,
     };
     this.model = monaco.editor.createModel(this.props.initialValue, 'lean', monaco.Uri.file(this.props.file));
     this.model.onDidChangeContent((e) => {
@@ -619,8 +621,9 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   }
 
   onSubmit(value) {
+    const lastFileName = value.split('#').shift().split('?').shift().split('/').pop();
     this.props.onUrlChange(value);
-    this.setState({ url: value });
+    this.setState({ url: value, lastFileName });
   }
 
   onSave() {
@@ -628,7 +631,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
     const a = document.createElement('a');
     const url = URL.createObjectURL(file);
     a.href = url;
-    a.download = this.props.file;
+    a.download = this.state.lastFileName;
     document.body.appendChild(a);
     a.click();
     setTimeout(() => {
@@ -636,9 +639,10 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       window.URL.revokeObjectURL(url);
     }, 0);
   }
-  onLoad(fileStr) {
+  onLoad(fileStr, lastFileName) {
     this.model.setValue(fileStr);
     this.props.clearUrlParam();
+    this.setState({ lastFileName });
   }
 
   onChecked() {

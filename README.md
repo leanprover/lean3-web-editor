@@ -1,6 +1,6 @@
 # lean-web-editor
 
-This repository contains the javascript code for my fork of the [Lean live editor](https://bryangingechen.github.io/lean/lean-web-editor). This branch is meant to be built with [a fork of `lean-client-js`](https://github.com/bryangingechen/lean-client-js/tree/cache); to do this, change the `lean-client-js-browser` entry in `package.json` [to point to a local path to that repository](https://docs.npmjs.com/files/package.json#local-paths).
+This repository contains the javascript code for my fork of the [Lean live editor](https://bryangingechen.github.io/lean/lean-web-editor). This branch uses [a fork of `lean-client-js`](https://github.com/bryangingechen/lean-client-js/tree/cache) (published as `@bryangingechen/lean-client-js` on npm).
 
 ## Running the development version
 

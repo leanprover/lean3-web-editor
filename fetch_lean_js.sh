@@ -7,6 +7,6 @@ mkdir -p dist
 # base_url=https://leanprover.github.io/live/latest/
 base_url=https://bryangingechen.github.io/lean/lean-web-editor/
 
-for i in lean_js_js.js lean_js_wasm.js lean_js_wasm.wasm library.zip; do
+for i in lean_js_js.js lean_js_wasm.js lean_js_wasm.wasm library.zip library.info.json library.olean_map.json; do
     curl $base_url/$i -o dist/$i
 done

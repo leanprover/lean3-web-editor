@@ -1,5 +1,5 @@
 /// <reference types="monaco-editor" />
-import * as lean from 'lean-client-js-browser';
+import * as lean from '@bryangingechen/lean-client-js-browser';
 import {leanSyntax} from './syntax';
 import * as translations from './translations.json';
 
@@ -81,9 +81,9 @@ class ModelWatcher implements monaco.IDisposable {
 }
 
 const completeChars = new Set(' ,');
-export function checkInputCompletion(e: monaco.editor.IModelContentChangedEvent,
-                                     editor: monaco.editor.IStandaloneCodeEditor,
-                                     model: monaco.editor.IModel): monaco.IPosition {
+export function checkInputCompletionChange(e: monaco.editor.IModelContentChangedEvent,
+                                           editor: monaco.editor.IStandaloneCodeEditor,
+                                           model: monaco.editor.IModel): void {
   if (e.changes.length !== 1) {
     return null;
   }
@@ -94,9 +94,6 @@ export function checkInputCompletion(e: monaco.editor.IModelContentChangedEvent,
       const line = model.getLineContent(lineNum);
       const cursorPos = change.range.startColumn;
       const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
-      // if (change.text === '\\') {
-      //   index = line.lastIndexOf('\\', index - 2) + 1;
-      // }
       const match = line.substring(index, cursorPos - 1);
       const replaceText = translations[match];
       if (index && replaceText) {
@@ -108,11 +105,42 @@ export function checkInputCompletion(e: monaco.editor.IModelContentChangedEvent,
           text: replaceText,
           forceMoveMarkers: false,
         }], () => [new monaco.Selection(lineNum, index, lineNum, index)]));
-        return new monaco.Position(lineNum, index + 2);
+        editor.setPosition(new monaco.Position(lineNum, index + 2));
       }
     }
   }
   return null;
+}
+export function checkInputCompletionPosition(e: monaco.editor.ICursorPositionChangedEvent,
+                                             editor: monaco.editor.IStandaloneCodeEditor,
+                                             model: monaco.editor.IModel): boolean {
+  const lineNum = e.position.lineNumber;
+  const line = model.getLineContent(lineNum);
+  const cursorPos = e.position.column;
+  const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
+  const match = line.substring(index, cursorPos - 1);
+  const replaceText = translations[match];
+  return index && replaceText;
+}
+export function tabHandler(editor: monaco.editor.IStandaloneCodeEditor,
+                           model: monaco.editor.IModel): void {
+  const sel = editor.getSelections();
+  const lineNum = sel[0].startLineNumber;
+  const line = model.getLineContent(lineNum);
+  const cursorPos = sel[0].startColumn;
+  const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
+  const match = line.substring(index, cursorPos - 1);
+  const replaceText = translations[match];
+  if (index && replaceText) {
+    const range = new monaco.Range(lineNum, index, lineNum, cursorPos);
+    editor.setSelections(model.pushEditOperations(sel, [{
+      identifier: {major: 1, minor: 1},
+      range,
+      text: replaceText,
+    forceMoveMarkers: false,
+    }], () => [new monaco.Selection(lineNum, index, lineNum, index)]));
+    editor.setPosition(new monaco.Position(lineNum, index + 1));
+  }
 }
 
 class CompletionBuffer {
@@ -152,10 +180,7 @@ export function registerLeanLanguage(leanJsOpts: lean.LeanJsOpts) {
     return;
   }
 
-  const transport =
-      (window as any).Worker ?
-          new lean.WebWorkerTransport(leanJsOpts) :
-          new lean.BrowserInProcessTransport(leanJsOpts);
+  const transport = new lean.WebWorkerTransport(leanJsOpts);
   server = new lean.Server(transport);
   server.error.on((err) => console.log('error:', err));
   server.connect();

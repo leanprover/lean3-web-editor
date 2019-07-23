@@ -1,10 +1,10 @@
 /// <reference types="monaco-editor" />
-import { InfoRecord, LeanJsOpts, Message } from 'lean-client-js-browser';
+import { InfoRecord, LeanJsOpts, Message } from '@bryangingechen/lean-client-js-browser';
 import * as React from 'react';
 import { createPortal, findDOMNode, render } from 'react-dom';
 import * as sp from 'react-split-pane';
-import { allMessages, checkInputCompletion, currentlyRunning, delayMs,
-  registerLeanLanguage, server } from './langservice';
+import { allMessages, checkInputCompletionChange, checkInputCompletionPosition, currentlyRunning, delayMs,
+  registerLeanLanguage, server, tabHandler } from './langservice';
 export const SplitPane: any = sp;
 
 function leanColorize(text: string): string {
@@ -532,7 +532,6 @@ interface LeanEditorState {
 class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
   model: monaco.editor.IModel;
   editor: monaco.editor.IStandaloneCodeEditor;
-  private newCursor: monaco.IPosition;
   constructor(props: LeanEditorProps) {
     super(props);
     this.state = {
@@ -544,8 +543,9 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       lastFileName: this.props.file,
     };
     this.model = monaco.editor.createModel(this.props.initialValue, 'lean', monaco.Uri.file(this.props.file));
+    this.model.updateOptions({ tabSize: 2 });
     this.model.onDidChangeContent((e) => {
-      this.newCursor = checkInputCompletion(e, this.editor, this.model);
+      checkInputCompletionChange(e, this.editor, this.model);
       const val = this.model.getValue();
       // do not change code URL param unless user has actually typed
       // (this makes the #url=... param a little more "sticky")
@@ -576,16 +576,14 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       scrollBeyondLastLine: false,
     };
     this.editor = monaco.editor.create(node, options);
+    const canTranslate = this.editor.createContextKey('canTranslate', false);
     this.editor.onDidChangeCursorPosition((e) => {
-      if (this.newCursor) {
-        // setting position to this.newCursor without nullifying leads to a loop
-        const tempCursor = this.newCursor;
-        this.newCursor = null;
-        this.editor.setPosition(tempCursor);
-        return;
-      }
+      canTranslate.set(checkInputCompletionPosition(e, this.editor, this.model));
       this.setState({cursor: {line: e.position.lineNumber, column: e.position.column - 1}});
     });
+    this.editor.addCommand(monaco.KeyCode.Tab, () => {
+      tabHandler(this.editor, this.model);
+    }, 'canTranslate');
 
     this.determineSplit();
     window.addEventListener('resize', this.updateDimensions);

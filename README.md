@@ -10,9 +10,11 @@ npm install
 ./node_modules/.bin/webpack-dev-server
 ```
 
+(You only need to run `npm install` and `./fetch_lean_js.sh` once after you download this repository.)
+
 The `fetch_lean_js.sh` script fetches a precompiled javascript version as well as a `library.zip` file containing the olean files for [`mathlib`](https://github.com/leanprover-community/mathlib), [`super`](https://github.com/leanprover/super), and [`mini_crush`](https://github.com/leanprover/mini_crush).
 
-It is also possible to build your own Javascript / WebAssembly version of [the community fork of Lean 3](https://github.com/leanprover-community/lean). See the instructions [here](https://github.com/leanprover-community/lean/blob/master/doc/make/index.md#building-js--wasm-binaries-with-emscripten). Prebuilt versions are also included with the leanprover-community [lean-nightly releases](https://github.com/leanprover-community/lean-nightly/releases). Copy the files `lean_js_js.js`, `lean_js_wasm.js` and `lean_js_wasm.wasm` to the `dist/` directory. Note that if you choose to go this route, you will also have to recompile the .olean files in library.zip (see below).
+It is also possible to build your own Javascript / WebAssembly version of [the community fork of Lean 3](https://github.com/leanprover-community/lean). See the instructions [here](https://github.com/leanprover-community/lean/blob/master/doc/make/index.md#building-js--wasm-binaries-with-emscripten). Prebuilt versions are also included with the leanprover-community [lean-nightly releases](https://github.com/leanprover-community/lean-nightly/releases). Copy the files `lean_js_js.js`, `lean_js_wasm.js` and `lean_js_wasm.wasm` to the `dist/` directory. Note that if you choose to go this route, you will also have to recompile the `.olean` files in `library.zip` (see below).
 
 ## Deployment
 
@@ -22,22 +24,33 @@ npm install
 NODE_ENV=production ./node_modules/.bin/webpack
 ```
 
+(You only need to run `npm install` and `./fetch_lean_js.sh` if you haven't already done so above.)
+
 Then copy the `./dist` directory wherever you want.
 
 ## Creating a customized `library.zip`
 
 If you want to include custom libraries, then you need to build a suitable `library.zip` file yourself.
 
-1. Install Lean 3. If you plan to use the prebuilt JS/WASM versions of Lean downloaded from the [leanprover-community/lean-nightly](https://github.com/leanprover-community/lean-nightly/releases) site, i.e. if you are not compiling Lean with Emscripten yourself, I recommend using [`elan`](https://github.com/kha/elan) to install the latest community version using the command
-`elan toolchain install leanprover-community/lean:nightly`. If you then check `elan show`, you should see a new toolchain with the name: `leanprover-community-lean-nightly`.
-2. To make a ZIP bundle of a selection of Lean packages, edit `combined_lib/leanpkg.toml`:
-    - `lean_version` needs to point to the same version of Lean as the Emscripten build of Lean you plan to use. If you've installed the community nightly with `elan` as above, then you'll want that line to read `lean_version = "leanprover-community-lean-nightly"`.
-    - Add the libraries you want to bundle to the `[dependencies]` section. You can use either `leanpkg add` or enter them manually with the format `mathlib = {git = "https://github.com/leanprover/mathlib", rev = "0c627fb3535d14955b2c2a24805b7cf473b4202f"}` (for dependencies retrievable using git) or `mathlib = {path = "/path/to/mathlib/"}` (for local dependencies).
-3. To make a ZIP bundle from a single Lean package (containing only the olean files needed for the files in its `src/` directory):
-    - To make a new Lean package, use `leanpkg new` following the instructions [here](https://github.com/leanprover-community/mathlib/blob/master/docs/install/project.md).
-    - If you have an existing Lean package, make a new copy of it since otherwise you'll have to recompile when you want to work on it again
-    - Change `lean_version` in `leanpkg.toml` to the same version as the Emscripten build of Lean. If you installed the community nightly with `elan` as above, then that line should read `lean_version = "leanprover-community-lean-nigthly"`.
-    - Delete `_target/` and run `leanpkg configure` to wipe all olean files in the dependencies
-4. If you followed step 2 (to make a bundle with several packages), run `./mk_library.py` (requires Python 3.7 or greater). If you followed step 3 (to make a bundle for a single package), run `./mk_library.py -i /path/to/your_lean_package`. This command will build the relevant olean files and then create a ZIP bundle (placed at `dist/library.zip` by default). Type `./mk_library.py -h` for information about command-line options. You may see "Lean version mismatch" warnings; these should be safe to ignore. This script will also generate a pair of `.json` files which are used by `lean-client-js-browser`:
+The main tool provided by this repository is a Python script, `mk_library.py`, which requires Python 3.7 or greater. Type `./mk_library.py -h` to see all command-line options.
+
+By default, the script will run `leanpkg build` in the `/combined_lib/` subdirectory, or a Lean package that you specify with `-i`, thus generating up-to-date `.olean` files. You may see "Lean version mismatch" warnings; these should be safe to ignore. (The `-c` command-line flag skips this step if you only want bundle Lean's core library files.) The script then copies all `.olean` files that it can find in the `leanpkg.path` into a ZIP bundle (placed at `dist/library.zip` by default, can be specified with `-o`). This script will also generate a pair of `.json` files which are used by `lean-client-js-browser`:
     - `dist/library.info.json` contains github URL prefixes to the precise commits of the Lean packages contained in `library.zip` and is used for caching,
     - `dist/library.olean_map.json` is used to help resolve references to individual `.lean` files returned by the Lean server to their URLs on github.
+
+Here are step-by-step instructions for the most common use-cases:
+
+1. Install Lean 3. If you plan to use the prebuilt JS/WASM versions of Lean downloaded from the [leanprover-community/lean-nightly](https://github.com/leanprover-community/lean-nightly/releases) site, i.e. if you are **not** compiling Lean with Emscripten yourself, I recommend using [`elan`](https://github.com/kha/elan) to install the latest community version using the command
+`elan toolchain install leanprover-community/lean:nightly`. If you then check `elan show`, you should see a new toolchain with the name: `leanprover-community-lean-nightly`.
+2. To make a ZIP bundle containing only Lean's core libraries, run `./mk_library.py -c`. You can set the output ZIP file location with `./mk_library.py -c -o /path/to/output.zip`.
+3. To make a ZIP bundle of a selection of Lean packages, edit `combined_lib/leanpkg.toml`:
+    - `lean_version` needs to point to the same version of Lean as the Emscripten build of Lean you plan to use. If you've installed the community nightly with `elan` as above, then you'll want that line to read `lean_version = "leanprover-community-lean-nightly"`.
+    - Add the libraries you want to bundle to the `[dependencies]` section. You can use either `leanpkg add` or enter them manually with the format `mathlib = {git = "https://github.com/leanprover/mathlib", rev = "0c627fb3535d14955b2c2a24805b7cf473b4202f"}` (for dependencies retrievable using git) or `mathlib = {path = "/path/to/mathlib/"}` (for local dependencies).
+    - In this use-case, it's important that you **don't** add a `path` to `leanpkg.toml`. Note that technically, such Lean packages are deprecated and `leanpkg` will emit a warning. Doing things this way causes `leanpkg build` to build all the Lean files in the packages you include, instead of just the ones depended on by the files in `/src`.
+    - Run `./mk_library.py`. You can set the output ZIP file location with `./mk_library.py -o /path/to/output.zip`.
+4. To make a ZIP bundle from a single Lean package (containing only the olean files needed for the files in its `src/` directory):
+    - To make a new Lean package, use `leanpkg new` following the instructions [here](https://github.com/leanprover-community/mathlib/blob/master/docs/install/project.md).
+    - If you have an existing Lean package, you might want to make a new copy of it since otherwise you'll have to recompile when you work on it again.
+    - `lean_version` needs to point to the same version of Lean as the Emscripten build of Lean you plan to use. If you installed the community nightly with `elan` as above, then that line should read `lean_version = "leanprover-community-lean-nigthly"`.
+    - Delete `_target/` in your Lean package directory if it already exists and run `leanpkg configure` to wipe all `.olean` files in the dependencies. This step is necessary since the script in the next step will copy all `.olean` files that it can find after rebuilding.
+    - Run `./mk_library.py -i /path/to/your_lean_package`. You can set the output ZIP file location with `./mk_library.py -i /path/to/your_lean_package -o /path/to/output.zip`.

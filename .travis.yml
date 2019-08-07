@@ -43,23 +43,23 @@ install:
 jobs:
   include:
     - stage: Build-1
-      # if: type = cron
       script:
+        - |
+          if [ $TRAVIS_EVENT_TYPE == 'cron' ]; then
+            find . -name *.olean -delete
+          fi
         - cd combined_lib_cache
         - leanpkg upgrade
-        # - find . -name *.olean -delete
         - cd ..
         - elan override set leanprover-community/lean:nightly
         - travis_long "./mk_library.py -c -o dist/libcore.zip"
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
 
     - stage: Build-2
-      # if: type = cron
       script:
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
 
     - stage: Build-3
-      # if: type = cron
       script:
         - travis_long "./mk_library.py -i combined_lib_cache"
         - cd lean-fibonacci
@@ -68,6 +68,6 @@ jobs:
         - travis_long "./mk_library.py -i lean-fibonacci -o dist/libfib.zip"
 
     - stage: Deploy
-      # if: type = cron
       script:
+        - rm -rf .git
         - sh deploy.sh

@@ -1,0 +1,60 @@
+dist: xenial # required for Python >= 3.7
+language: python
+python:
+  - "3.7"
+sudo: false
+os:
+    - linux
+branches:
+  only:
+    - ui
+
+env:
+  global:
+    - secure: "pB1NAfr+IlJphEjlMhuC8tuXy4aL5Ypg84mp/c2dzVENZbw6N0JsRdGWWPhgdGsSFHRqBsBbEirqMNij62MO/nv+pMpNl5R8u3Dk9LDafZLAzbbD275ppFLm8cvpoHnFeyELzkCfKo5wHlfzBSk5fDHh4EhJhsETZPTFs8Yw7oFP21E6Ae0rHzzlf4hxGWIfCL+eN1JWfhIEQmdm1ZEHHF+2mVzol0NX2T30smvECoNcNemW28sieKeoblhsNkRfQIPXcffm3gsaku7O99pEf+IIQwvPhvyGUdRZq0oNDGb5DRjRFdVFSzY8lcKrlNgAHwa+FnSNRUbihiBDRqCED38wlmJg+pO0hW9NzSzpg0K/I+IzxXOw83qojBatHEnjhkZ0m+OXsuQhNzRfKKKntjdBP5ML6LMGKMY2hw7ZJl7oR7A6/aSWeDwGyRHQPn2ZaMDdZj5QlHSSf1yLwQ9JpGx2FVpqah9KC+HsPttSo4Q3qUHalVZlN2ToMRPHf9KgkAcDYZRirvmpidkKvse6L2cx7/S8VxbjbiXbvjC24pkfRqbr0/dFcQaWz7rUUVd6T/zYx1s4nQtwpRYSzTaeOcp6bmoP+vt3PKFQiPwxaEQy25pYZzSvEmt4YagkClZZZ0djkTOrLSID4Ik9SJnOAlHsNnroo0ETJFVbrZbDLWc="
+
+cache:
+  directories:
+    - $TRAVIS_BUILD_DIR/combined_lib_cache/
+    - $TRAVIS_BUILD_DIR/dist/
+    - $HOME/.elan
+
+install:
+  - |
+    if [ ! -d "$HOME/.elan/toolchains/" ]; then
+      curl https://raw.githubusercontent.com/Kha/elan/master/elan-init.sh -sSf | sh -s -- --default-toolchain none -y
+    fi
+  - |
+    if [ ! -e "$TRAVIS_BUILD_DIR/combined_lib_cache/leanpkg.toml" ]; then
+      cp -av combined_lib/. combined_lib_cache
+    fi
+  - source ~/.elan/env
+  - elan toolchain install leanprover-community/lean:nightly
+  - mkdir $HOME/scripts || echo ""
+  - export PATH="$HOME/scripts:$PATH"
+  - cp travis_long.sh $HOME/scripts/travis_long
+  - chmod +x $HOME/scripts/travis_long
+
+jobs:
+  include:
+    - stage: Build-1
+      # if: type = cron
+      script:
+        - cd combined_lib_cache
+        - leanpkg upgrade
+        - find . -name *.olean -delete
+        - cd ..
+        - elan override set leanprover-community/lean:nightly
+        - travis_long "./mk_library.py -c -o dist/libcore.zip"
+        - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
+
+    - stage: Build-2
+      # if: type = cron
+      script:
+        - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
+
+    - stage: Deploy
+      # if: type = cron
+      script:
+        - travis_long "./mk_library.py -i combined_lib_cache"
+        - sh deploy.sh

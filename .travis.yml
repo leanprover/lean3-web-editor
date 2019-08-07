@@ -16,6 +16,7 @@ env:
 cache:
   directories:
     - $TRAVIS_BUILD_DIR/combined_lib_cache/
+    - $TRAVIS_BUILD_DIR/lean-fibonacci/
     - $TRAVIS_BUILD_DIR/dist/
     - $HOME/.elan
 
@@ -27,6 +28,10 @@ install:
   - |
     if [ ! -e "$TRAVIS_BUILD_DIR/combined_lib_cache/leanpkg.toml" ]; then
       cp -av combined_lib/. combined_lib_cache
+    fi
+  - |
+    if [ ! -e "$TRAVIS_BUILD_DIR/lean-fibonacci/leanpkg.toml" ]; then
+      git clone https://github.com/bryangingechen/lean-fibonacci.git
     fi
   - source ~/.elan/env
   - elan toolchain install leanprover-community/lean:nightly
@@ -53,8 +58,16 @@ jobs:
       script:
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
 
-    - stage: Deploy
+    - stage: Build-3
       # if: type = cron
       script:
         - travis_long "./mk_library.py -i combined_lib_cache"
+        - cd lean-fibonacci
+        - git pull
+        - cd ..
+        - travis_long "./mk_library.py -i lean-fibonacci -o dist/libfib.zip"
+
+    - stage: Deploy
+      # if: type = cron
+      script:
         - sh deploy.sh

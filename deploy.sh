@@ -45,23 +45,24 @@ cd ..
 cp -a dist/. lean-web-editor-dist
 cd lean-web-editor-dist
 git add -A
-git diff-index --quiet HEAD || git commit --amend --no-edit
+git diff-index HEAD || git commit --amend --no-edit
 git push deploy -f --dry-run
 cd ..
 
 # push bryangingechen.github.io
-cd bryangingechen.github.io/lean/lean-web-editor
+cd bryangingechen.github.io
 git submodule update --init --remote
 git add -A
-git diff-index --quiet HEAD || git commit -m "lean-web-editor-dist: $(date)"
+git diff-index HEAD || git commit -m "lean-web-editor-dist: $(date)"
 git push deploy --dry-run
-cd ../../..
+cd ..
 
 # push leanprover-community.github.io
 COMMUNITY=TRUE NODE_ENV=production ./node_modules/.bin/webpack
 cd leanprover-community.github.io
 git pull
 cp -a ../dist/. lean-web-editor
+rm lean-web-editor/libfib*
 git add -A
-git diff-index --quiet HEAD || git commit -m "lean-web-editor: $(date)"
+git diff-index HEAD || git commit -m "lean-web-editor: $(date)"
 git push deploy --dry-run

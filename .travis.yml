@@ -11,7 +11,7 @@ branches:
 
 env:
   global:
-    - secure: "pB1NAfr+IlJphEjlMhuC8tuXy4aL5Ypg84mp/c2dzVENZbw6N0JsRdGWWPhgdGsSFHRqBsBbEirqMNij62MO/nv+pMpNl5R8u3Dk9LDafZLAzbbD275ppFLm8cvpoHnFeyELzkCfKo5wHlfzBSk5fDHh4EhJhsETZPTFs8Yw7oFP21E6Ae0rHzzlf4hxGWIfCL+eN1JWfhIEQmdm1ZEHHF+2mVzol0NX2T30smvECoNcNemW28sieKeoblhsNkRfQIPXcffm3gsaku7O99pEf+IIQwvPhvyGUdRZq0oNDGb5DRjRFdVFSzY8lcKrlNgAHwa+FnSNRUbihiBDRqCED38wlmJg+pO0hW9NzSzpg0K/I+IzxXOw83qojBatHEnjhkZ0m+OXsuQhNzRfKKKntjdBP5ML6LMGKMY2hw7ZJl7oR7A6/aSWeDwGyRHQPn2ZaMDdZj5QlHSSf1yLwQ9JpGx2FVpqah9KC+HsPttSo4Q3qUHalVZlN2ToMRPHf9KgkAcDYZRirvmpidkKvse6L2cx7/S8VxbjbiXbvjC24pkfRqbr0/dFcQaWz7rUUVd6T/zYx1s4nQtwpRYSzTaeOcp6bmoP+vt3PKFQiPwxaEQy25pYZzSvEmt4YagkClZZZ0djkTOrLSID4Ik9SJnOAlHsNnroo0ETJFVbrZbDLWc="
+    secure: "xkQXZXrchGxi/pUUresJXJGmnFtN4wCW1kKr043Ti+mkMrWy27d/zsiRn/ovfo8mr1ZWcUr6hZrfcWCMSFp9L3nOUfXcWydkYilgJThFLBibXw6QBXPwGvNsyWpzJemM2jbp0FsubqtI8Zk5qbGGvlgQrywyPKy5F7B2hcOOmmQ51psvngpgaETfu9bA/OVXD4UR3ASN2rXhC01UGS47U+QhC9WYCgO7Z29j+MCrUvPIfnaNResauQw1UL4zdxFCml0KrZvj2vOge6N/emboSPcx6kW8cjpgAP45Q/Iy4GgOrK04H1cwQWw8lLdV7twJt2UKU85a0c4qPhcpS5ehqsXWb5kOBzE0UgGlrVusT3qkhFMpQk1y7AKI5yE4of/qRNheqOE6099zjK5wakWEglf8P2jGDglA3OM9U7uUVAGX3HqjwDd5bM+pNAIU0gppzsEggsu0ztM3S1IkjgW2nyNuSQaneCP342sGjP6umDcYSsnNyw+6jVLS06mPGw3VKYDKwHSXpG+oqS+EUr2Zj7hoUzWMj+xUwKf+9ebI5GX0D2L7HNWJzFhu1VieTTmQgDarWR2VOCzG3lk4kzBqSpBdQpKTNIaon7wV9TrJ2QCtEOYm2ehy8OdDxXOhFwP7KsA6rAhyfM+crTPuZNN00RITLuesSfq8O1vvTrS0o6I="
 
 cache:
   directories:
@@ -42,7 +42,7 @@ jobs:
       script:
         - cd combined_lib_cache
         - leanpkg upgrade
-        - find . -name *.olean -delete
+        # - find . -name *.olean -delete
         - cd ..
         - elan override set leanprover-community/lean:nightly
         - travis_long "./mk_library.py -c -o dist/libcore.zip"

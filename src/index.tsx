@@ -453,7 +453,7 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           If there are errors, warnings, or info messages, they will be underlined in red or green in the editor
           and a message will be displayed in the info panel.</p>
           <p>You can input unicode characters by entering "\" and then typing the corresponding code (see below)
-            and then typing a space or a comma.</p>
+            and then either typing a space or a comma or hitting TAB.</p>
           <p>Here are a few common codes. Note that many other LaTeX commands will work as well:<br/>
             "lam" for "λ", "to" (or "-&gt;") for "→", "l" (or "&lt;-") for "←", "u" for "↑", "d" for "↓",
             "in" for "∈", "and" for "∧", "or" for "∨", "x" for "×",
@@ -506,6 +506,22 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
               console.log("Couldn't delete leanlibrary due to the operation being blocked");
             };
           }}>Clear library cache and refresh</button></p>
+          <p><button onClick={() => {
+            if ((self as any).WebAssembly) {
+              fetch(leanJsOpts.webassemblyJs, {cache: 'reload'})
+                .then(() => fetch(leanJsOpts.webassemblyWasm, {cache: 'reload'}))
+                .then(() => {
+                console.log('Updated JS & WASM cache successfully');
+                location.reload(true);
+              }).catch((e) => console.log(e));
+            } else {
+              fetch(leanJsOpts.javascript, {cache: 'reload'})
+                .then(() => {
+                console.log('Updated JS cache successfully');
+                location.reload(true);
+              }).catch((e) => console.log(e));
+            }
+          }}>Clear JS/WASM cache and refresh</button></p>
         </div>
       </div>
     </aside>,
@@ -738,8 +754,7 @@ function App() {
   );
 }
 
-const hostPrefix = './';
-// const hostPrefix = 'https://tqft.net/lean/web-editor/';
+const hostPrefix = process.env.COMMUNITY ? 'https://tqft.net/lean/web-editor/' : './';
 
 const leanJsOpts: LeanJsOpts = {
   javascript: hostPrefix + 'lean_js_js.js',

@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -49,6 +50,10 @@ module.exports = {
         publicPath: '/',
     },
     plugins: [
+        // used to change hostPrefix in index.tsx to 'https://tqft.net/lean/web-editor/'
+        new webpack.EnvironmentPlugin({
+            'COMMUNITY': false
+        }),
         new HtmlWebpackPlugin({
             template: 'public/index.html'
         }),

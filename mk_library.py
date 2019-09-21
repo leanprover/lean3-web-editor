@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, argparse
+import argparse
 import zipfile
 import os, subprocess, json, re
 from pathlib import Path

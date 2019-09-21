@@ -577,6 +577,14 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
     this.onChecked = this.onChecked.bind(this);
   }
   componentDidMount() {
+    /* TODO: factor this out */
+    const ta = document.createElement('div');
+    ta.style.fontSize = '1px';
+    ta.style.lineHeight = '1';
+    ta.innerHTML = 'a';
+    document.body.appendChild(ta);
+    const minimumFontSize = ta.clientHeight;
+    ta.remove();
     const node = findDOMNode(this.refs.monaco) as HTMLElement;
     const options: monaco.editor.IEditorConstructionOptions = {
       selectOnLineNumbers: true,
@@ -590,6 +598,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       minimap: {enabled: false},
       wordWrap: 'on',
       scrollBeyondLastLine: false,
+      fontSize: minimumFontSize > 1 ? minimumFontSize : null,
     };
     this.editor = monaco.editor.create(node, options);
     const canTranslate = this.editor.createContextKey('canTranslate', false);

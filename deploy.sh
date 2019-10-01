@@ -14,6 +14,7 @@ fi
 git clone https://github.com/bryangingechen/lean-web-editor-dist.git
 cd lean-web-editor-dist
 git remote add deploy "https://$GITHUB_TOKEN@github.com/bryangingechen/lean-web-editor-dist.git"
+rm -f *.worker.js
 cd ..
 
 git clone https://github.com/bryangingechen/bryangingechen.github.io.git
@@ -24,6 +25,7 @@ cd ..
 git clone https://github.com/leanprover-community/leanprover-community.github.io.git
 cd leanprover-community.github.io
 git remote add deploy "https://$GITHUB_TOKEN@github.com/leanprover-community/leanprover-community.github.io.git"
+rm -f lean-web-editor/*.worker.js
 cd ..
 
 LATEST_LEAN=$(curl -s https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean-nightly/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d : -f 2,3 | tr -d \"\ )
@@ -31,6 +33,7 @@ LATEST_LEAN=$(curl -s https://$GITHUB_TOKEN@api.github.com/repos/leanprover-comm
 # After this point, we don't use any secrets in commands.
 set -x				# echo commands
 
+rm -f dist/*.worker.js
 npm install
 NODE_ENV=production ./node_modules/.bin/webpack
 cd dist
@@ -62,8 +65,8 @@ COMMUNITY=TRUE NODE_ENV=production ./node_modules/.bin/webpack
 cd leanprover-community.github.io
 git pull
 cp -a ../dist/. lean-web-editor
-rm lean-web-editor/lib*
-rm lean-web-editor/lean_js_*
+rm -f lean-web-editor/lib*
+rm -f lean-web-editor/lean_js_*
 git add -A
 git diff-index HEAD
 git diff-index --quiet HEAD || { git commit -m "lean-web-editor: $(date)" && git push deploy; }

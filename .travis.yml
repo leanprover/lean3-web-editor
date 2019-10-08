@@ -60,7 +60,11 @@ jobs:
         - travis_long "./mk_library.py -c -o dist/libcore.zip"
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
 
-    - stage: Build-2
+    - stage: Build-2a
+      script:
+        - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
+
+    - stage: Build-2b
       script:
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
 

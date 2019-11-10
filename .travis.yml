@@ -58,6 +58,7 @@ jobs:
         - cd ..
         - elan override set leanprover-community/lean:nightly
         - travis_long "./mk_library.py -c -o dist/libcore.zip"
+        - rm -rf combined_lib_cache/_target/deps/mathlib/scripts
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
 
     - stage: Build-2a

@@ -28,7 +28,7 @@ git remote add deploy "https://$GITHUB_TOKEN@github.com/leanprover-community/lea
 rm -f lean-web-editor/*.worker.js
 cd ..
 
-LATEST_LEAN=$(curl -s https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean-nightly/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d : -f 2,3 | tr -d \"\ )
+LATEST_BROWSER_LEAN_URL=$(curl -s https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean-nightly/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d : -f 2,3 | tr -d \"\ )
 
 # After this point, we don't use any secrets in commands.
 set -x				# echo commands
@@ -37,7 +37,7 @@ rm -f dist/*.worker.js
 npm install
 NODE_ENV=production ./node_modules/.bin/webpack
 cd dist
-curl -sL $LATEST_LEAN --output leanbrowser.zip
+curl -sL $LATEST_BROWSER_LEAN_URL --output leanbrowser.zip
 unzip -q leanbrowser.zip
 rm leanbrowser.zip
 mv build/shell/* .

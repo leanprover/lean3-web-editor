@@ -39,7 +39,7 @@ install:
       git clone https://github.com/bryangingechen/natural_number_game.git
     fi
   - source ~/.elan/env
-  - elan toolchain install leanprover-community/lean:nightly
+  - . ./elan_setup.sh
   - mkdir $HOME/scripts || echo ""
   - export PATH="$HOME/scripts:$PATH"
   - cp travis_long.sh $HOME/scripts/travis_long
@@ -56,7 +56,7 @@ jobs:
         - cd combined_lib_cache
         - leanpkg upgrade
         - cd ..
-        - elan override set leanprover-community/lean:nightly
+        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN_NIGHTLY
         - travis_long "./mk_library.py -c -o dist/libcore.zip"
         - rm -rf combined_lib_cache/_target/deps/mathlib/scripts
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py

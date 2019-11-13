@@ -11,9 +11,11 @@ if ! [ "$TRAVIS_SECURE_ENV_VARS" = "true" ]; then
     exit 1			# Something's wrong.
 fi
 
-LATEST_BROWSER_LEAN_NIGHTLY=$(curl -s https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean-nightly/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d / -f 8 )
+LATEST_BROWSER_LEAN_NIGHTLY=$(curl -s -N https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean-nightly/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d / -f 8 )
 
 # After this point, we don't use any secrets in commands.
 set -x				# echo commands
 
 elan toolchain install leanprover-community/lean:$LATEST_BROWSER_LEAN_NIGHTLY
+
+set +x

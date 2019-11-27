@@ -444,7 +444,10 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           <a href='https://github.com/leanprover-community/mathlib#installation'>here</a>.
           The books <a href='https://leanprover.github.io/theorem_proving_in_lean'>Theorem Proving in Lean</a>&nbsp;
           and <a href='https://leanprover.github.io/logic_and_proof/'>Logic and Proof</a> are reasonable places
-          to start learning Lean. If you have questions, drop by the&nbsp;
+          to start learning Lean. For a more interactive approach,
+          you might try <a href='http://wwwf.imperial.ac.uk/~buzzard/xena/natural_number_game/'>the
+          "Natural number game"</a>.
+          If you have questions, drop by the&nbsp;
           <a href='https://leanprover.zulipchat.com/#'>leanprover zulip chat</a>.</p>
 
           <h3>Using this editor:</h3>
@@ -480,8 +483,8 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           original <a href='https://leanprover.github.io/live'>lean-web-editor</a> app
           (written in typescript+react and using the Monaco
           editor; see the original github repository <a href='https://github.com/leanprover/lean-web-editor'>here</a>).
-          This page also uses <a href='https://github.com/bryangingechen/tree/cache'>a forked version</a> of
-          the <a href='https://github.com/leanprover/lean-client-js'>lean-client-browser</a> package
+          This page also uses <a href='https://github.com/bryangingechen/lean-client-js/tree/cache'>a forked version</a>
+          of the <a href='https://github.com/leanprover/lean-client-js'>lean-client-browser</a> package
           that caches the library.zip file
           in <a href='https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API'>IndexedDB</a>.</p>
           <h3>Lean packages in library.zip:</h3>
@@ -763,7 +766,8 @@ function App() {
   );
 }
 
-const hostPrefix = process.env.COMMUNITY ? 'https://cdn.jsdelivr.net/gh/bryangingechen/lean-web-editor-dist/' : './';
+// const hostPrefix = process.env.COMMUNITY ? 'https://cdn.jsdelivr.net/gh/bryangingechen/lean-web-editor-dist/' : './';
+const hostPrefix = process.env.COMMUNITY ? 'https://tqft.net/lean/web-editor/' : './';
 
 const leanJsOpts: LeanJsOpts = {
   javascript: hostPrefix + 'lean_js_js.js',

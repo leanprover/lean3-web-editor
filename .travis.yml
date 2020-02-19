@@ -53,10 +53,10 @@ jobs:
           if [ $TRAVIS_EVENT_TYPE == 'cron' ]; then
             find . -name *.olean -delete
           fi
-        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN_NIGHTLY
+        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
         - travis_long "./mk_library.py -c -o dist/libcore.zip"
         - cd combined_lib_cache
-        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN_NIGHTLY
+        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
         - leanpkg upgrade
         - rm -rf _target/deps/mathlib/scripts
         - cd ..
@@ -74,12 +74,12 @@ jobs:
       script:
         - travis_long "./mk_library.py -i combined_lib_cache"
         - cd lean-fibonacci
-        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN_NIGHTLY
+        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
         - git pull
         - cd ..
         - travis_long "./mk_library.py -i lean-fibonacci -o dist/libfib.zip"
         - cd natural_number_game
-        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN_NIGHTLY
+        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
         - git pull
         - git checkout observable
         - cd ..

@@ -489,7 +489,22 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           in <a href='https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API'>IndexedDB</a>.</p>
           <h3>Lean packages in library.zip:</h3>
           {libinfo}
-          <h3>Debug settings:</h3>
+          <h3>Settings:</h3>
+          <p><input id='showUnderlines' type='checkbox' defaultChecked={!document.getElementById('hideUnderline')}
+          onChange={(e) => {
+            if (!e.target.checked && !document.getElementById('hideUnderline')) {
+              const style = document.createElement('style');
+              style.type = 'text/css';
+              style.id = 'hideUnderline';
+              style.appendChild(document.createTextNode(`.monaco-editor .greensquiggly,
+              .monaco-editor .redsquiggly { background-size:0px; }`));
+              document.head.appendChild(style);
+            } else if (document.getElementById('hideUnderline')) {
+              document.getElementById('hideUnderline').remove();
+            }
+          }}/> <label htmlFor='showUnderlines'>
+            Decorate code with squiggly underlines for errors / warnings / info</label></p>
+          <h3>Debug:</h3>
           <p><input id='logToConsole' type='checkbox' defaultChecked={server.logMessagesToConsole} onChange={(e) => {
             server.logMessagesToConsole = e.target.checked;
             console.log(`server logging ${server.logMessagesToConsole ?

@@ -59,6 +59,7 @@ jobs:
         - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
         - leanpkg upgrade
         - rm -rf _target/deps/mathlib/scripts
+        - rm -rf _target/deps/mathlib/roadmap
         - cd ..
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
 

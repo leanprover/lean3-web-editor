@@ -42,7 +42,7 @@ interface GoalWidgetProps {
   position: Position;
 }
 function GoalWidget({goal, position}: GoalWidgetProps) {
-  const tacticHeader = goal.text && <div className='info-header'>
+  const tacticHeader = goal.text && <div className='info-header doc-header'>
     {position.line}:{position.column}: tactic {
       <span className='code-block' style={{fontWeight: 'normal', display: 'inline'}}>{goal.text}</span>}</div>;
   const docs = goal.doc && <ToggleDoc doc={goal.doc}/>;
@@ -499,14 +499,33 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
               style.appendChild(document.createTextNode(`.monaco-editor .greensquiggly,
               .monaco-editor .redsquiggly { background-size:0px; }`));
               document.head.appendChild(style);
+              window.localStorage.setItem('underline', 'true');
             } else if (document.getElementById('hideUnderline')) {
               document.getElementById('hideUnderline').remove();
+              window.localStorage.setItem('underline', 'false');
             }
           }}/> <label htmlFor='showUnderlines'>
             Decorate code with squiggly underlines for errors / warnings / info</label></p>
+            <p><input id='showDocs' type='checkbox' defaultChecked={!document.getElementById('hideDocs')}
+          onChange={(e) => {
+            if (!e.target.checked && !document.getElementById('hideDocs')) {
+              const style = document.createElement('style');
+              style.type = 'text/css';
+              style.id = 'hideDocs';
+              style.appendChild(document.createTextNode(`.toggleDoc, .doc-header { display:none; }`));
+              document.head.appendChild(style);
+              window.localStorage.setItem('docs', 'true');
+            } else if (document.getElementById('hideDocs')) {
+              document.getElementById('hideDocs').remove();
+              window.localStorage.setItem('dosc', 'false');
+            }
+          }}/> <label htmlFor='showDocs'>
+            Show tactic docs in info panel (regardless of whether this is checked,
+            tactic docs can be viewed by hovering your cursor over the tactic name)</label></p>
           <h3>Debug:</h3>
           <p><input id='logToConsole' type='checkbox' defaultChecked={server.logMessagesToConsole} onChange={(e) => {
             server.logMessagesToConsole = e.target.checked;
+            window.localStorage.setItem('logging', e.target.checked ? 'true' : 'false');
             console.log(`server logging ${server.logMessagesToConsole ?
               'start' : 'end'}ed!`);
           }}/> <label htmlFor='logToConsole'>
@@ -774,6 +793,24 @@ function App() {
   }
 
   const fn = monaco.Uri.file('test.lean').fsPath;
+
+  if (window.localStorage.getItem('underline') === 'true') {
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.id = 'hideUnderline';
+    style.appendChild(document.createTextNode(`.monaco-editor .greensquiggly,
+    .monaco-editor .redsquiggly { background-size:0px; }`));
+    document.head.appendChild(style);
+  }
+
+  if (window.localStorage.getItem('docs') === 'true') {
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.id = 'hideDocs';
+    style.appendChild(document.createTextNode(`.toggleDoc, .doc-header { display:none; }`));
+    document.head.appendChild(style);
+  }
+
   return (
     <LeanEditor file={fn} initialValue={params.code} onValueChange={(newValue) => changeUrl(newValue, 'code')}
     initialUrl={params.url} onUrlChange={(newValue) => changeUrl(newValue, 'url')}

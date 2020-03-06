@@ -11,7 +11,8 @@ if ! [ "$TRAVIS_SECURE_ENV_VARS" = "true" ]; then
     exit 1			# Something's wrong.
 fi
 
-LATEST_BROWSER_LEAN=3.5.1 # $(curl -s -N https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d / -f 8 | cut -d v -f 2)
+LATEST_BROWSER_LEAN=$(grep -m1 version combined_lib/leanpkg.toml | cut -d'"' -f2)
+# $(curl -s -N https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d / -f 8 | cut -d v -f 2)
 
 # After this point, we don't use any secrets in commands.
 set -x				# echo commands

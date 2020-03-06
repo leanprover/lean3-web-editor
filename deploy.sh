@@ -28,7 +28,8 @@ git remote add deploy "https://$GITHUB_TOKEN@github.com/leanprover-community/lea
 rm -f lean-web-editor/*.worker.js
 cd ..
 
-LATEST_BROWSER_LEAN_URL=https://github.com/leanprover-community/lean/releases/download/v3.5.1/lean-3.5.1--browser.zip # $(curl -s -N https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d : -f 2,3 | tr -d \"\ )
+LATEST_BROWSER_LEAN_URL=https://github.com/leanprover-community/lean/releases/download/v$LATEST_BROWSER_LEAN/lean-$LATEST_BROWSER_LEAN--browser.zip
+# $(curl -s -N https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d : -f 2,3 | tr -d \"\ )
 
 # After this point, we don't use any secrets in commands.
 set -x				# echo commands

@@ -747,7 +747,7 @@ const defaultValue =
 if s ≠ "" then s ++ ", " else s, "commit ", (lean.githash.to_list.take 12).as_string, ")"]
 
 example (m n : ℕ) : m + n = n + m :=
-by simp`;
+by simp [add_comm]`;
 
 interface HashParams {
   url: string;

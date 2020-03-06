@@ -34,10 +34,6 @@ install:
     if [ ! -e "$TRAVIS_BUILD_DIR/lean-fibonacci/leanpkg.toml" ]; then
       git clone https://github.com/bryangingechen/lean-fibonacci.git
     fi
-  - |
-    if [ ! -e "$TRAVIS_BUILD_DIR/natural_number_game/leanpkg.toml" ]; then
-      git clone https://github.com/bryangingechen/natural_number_game.git
-    fi
   - source ~/.elan/env
   - source elan_setup.sh
   - mkdir $HOME/scripts || echo ""
@@ -79,12 +75,6 @@ jobs:
         - git pull
         - cd ..
         - travis_long "./mk_library.py -i lean-fibonacci -o dist/libfib.zip"
-        - cd natural_number_game
-        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
-        - git pull
-        - git checkout observable
-        - cd ..
-        - travis_long "./mk_library.py -i natural_number_game -o dist/libnatgame.zip"
 
     - stage: Deploy
       script:

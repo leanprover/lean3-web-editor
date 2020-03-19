@@ -74,6 +74,8 @@ with zipfile.ZipFile(library_zip_fn, mode='w', compression=zipfile.ZIP_DEFLATED,
                 print('duplicate: {0}'.format(fn))
             else:
                 zf.write(fn, arcname=str(rel))
+                # uncomment if you want to use Lean 3.7.0 (fixed in 3.7.1)
+                # zf.write(fn.with_suffix('.lean'), arcname=str(rel.with_suffix('.lean')))
                 oleans[str(rel)[:-6]] = lib_name
                 num_olean[lib_name] += 1
                 already_seen.add(rel)

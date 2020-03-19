@@ -17,7 +17,6 @@ cache:
   directories:
     - $TRAVIS_BUILD_DIR/combined_lib_cache/
     - $TRAVIS_BUILD_DIR/lean-fibonacci/
-    - $TRAVIS_BUILD_DIR/natural_number_game/
     - $TRAVIS_BUILD_DIR/dist/
     - $HOME/.elan
 

@@ -1,7 +1,7 @@
 [package]
 name = "combined_lib"
-version = "3.7.1"
-lean_version = "leanprover-community/lean:3.7.1"
+version = "3.7.2"
+lean_version = "leanprover-community/lean:3.7.2"
 
 [dependencies]
 super = {git = "https://github.com/leanprover/super", rev = "fe50a40c3e2aeda02aa07c64752b0acf1edd9af4"}

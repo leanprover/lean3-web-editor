@@ -12,7 +12,7 @@ if ! [ "$TRAVIS_SECURE_ENV_VARS" = "true" ]; then
 fi
 
 # Get lean_version from mathlib master:
-export LATEST_BROWSER_LEAN=$(curl -s -N https://raw.githubusercontent.com/leanprover-community/mathlib/master/leanpkg.toml | grep -m1 lean_version | cut -d'"' -f2)
+export LATEST_BROWSER_LEAN=$(curl -s -N https://raw.githubusercontent.com/leanprover-community/mathlib/master/leanpkg.toml | grep -m1 lean_version | cut -d'"' -f2 | cut -d':' -f2)
 # Get lean_version from leanpkg.toml in this repo:
 # $(grep -m1 version combined_lib/leanpkg.toml | cut -d'"' -f2)
 # Get lean_version from latest released Lean

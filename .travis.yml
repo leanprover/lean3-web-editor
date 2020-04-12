@@ -53,6 +53,7 @@ jobs:
         - cd combined_lib_cache
         - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
         - leanpkg upgrade
+        - rm -rf _target/deps/mathlib/test
         - rm -rf _target/deps/mathlib/scripts
         - rm -rf _target/deps/mathlib/roadmap
         - cd ..

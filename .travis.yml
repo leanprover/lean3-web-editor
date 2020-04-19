@@ -70,13 +70,20 @@ jobs:
     - stage: Build-3
       script:
         - travis_long "./mk_library.py -i combined_lib_cache"
-        - cd lean-fibonacci
-        - elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
+        # make sure we use the same version of Lean that we started with in "Build-1"
+        - cd combined_lib_cache
+        - ELAN_OVERRIDE=$(elan show | grep Lean | cut -d ',' -f1 | cut -d ' ' -f3)
+        - cd ../lean-fibonacci
+        - elan override set leanprover-community/lean:$ELAN_OVERRIDE
         - git pull
         - cd ..
         - travis_long "./mk_library.py -i lean-fibonacci -o dist/libfib.zip"
 
     - stage: Deploy
       script:
+        # make sure we use the same version of Lean that we started with in "Build-1"
+        - cd combined_lib_cache
+        - export ELAN_OVERRIDE=$(elan show | grep Lean | cut -d ',' -f1 | cut -d ' ' -f3)
+        - cd ..
         - rm -rf .git
         - sh deploy.sh

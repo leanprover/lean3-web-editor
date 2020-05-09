@@ -11,8 +11,7 @@ branches:
 
 env:
   global:
-    secure: "xkQXZXrchGxi/pUUresJXJGmnFtN4wCW1kKr043Ti+mkMrWy27d/zsiRn/ovfo8mr1ZWcUr6hZrfcWCMSFp9L3nOUfXcWydkYilgJThFLBibXw6QBXPwGvNsyWpzJemM2jbp0FsubqtI8Zk5qbGGvlgQrywyPKy5F7B2hcOOmmQ51psvngpgaETfu9bA/OVXD4UR3ASN2rXhC01UGS47U+QhC9WYCgO7Z29j+MCrUvPIfnaNResauQw1UL4zdxFCml0KrZvj2vOge6N/emboSPcx6kW8cjpgAP45Q/Iy4GgOrK04H1cwQWw8lLdV7twJt2UKU85a0c4qPhcpS5ehqsXWb5kOBzE0UgGlrVusT3qkhFMpQk1y7AKI5yE4of/qRNheqOE6099zjK5wakWEglf8P2jGDglA3OM9U7uUVAGX3HqjwDd5bM+pNAIU0gppzsEggsu0ztM3S1IkjgW2nyNuSQaneCP342sGjP6umDcYSsnNyw+6jVLS06mPGw3VKYDKwHSXpG+oqS+EUr2Zj7hoUzWMj+xUwKf+9ebI5GX0D2L7HNWJzFhu1VieTTmQgDarWR2VOCzG3lk4kzBqSpBdQpKTNIaon7wV9TrJ2QCtEOYm2ehy8OdDxXOhFwP7KsA6rAhyfM+crTPuZNN00RITLuesSfq8O1vvTrS0o6I="
-
+    secure: "WDJfE00W9Od0kZU3wJpXVs0cJrOuoNQjmIBZgXcLrQJBDYwdegqWAFbQTixYZBDFri8fvBHT5WNHOp88DW+q6zboiCY2C5omhcOHEqRfBxq089IxA34sF9HNXPyYCOxjHphZ9AHDJQP65KeUK7b8Gg2Wz8rFTCeth2T19hZC99mtpdeRUBE1xkxrUuu8csV1C/OcUdfPq+cufynyExrxWI3HZAICykU5CbCBfBvrbVH9gVrhvshHjc0NK6H5jfjmEdizxHSXs+i4uWk+CdxKbRS1LZqMD2GZq7yczowz1yZwpRdCT5UbXF6j90Bm5I+idUPH9u1ALAB3mNt6TBjyMeIo6QOv+scaGD75P3FDnwe6hQ1XcD1iLBNLCYtxyglgyht5loKrD++WTEowyHGQeQLekWpqen+VYVi0yIdkfCHCdSFDX7Z56nUc7n8pwJ+aLABgbIxhSpIOb4uLkk56MZzrYnszVDPlnUBjLsQaVZWCnEp6BiqeFeJVHl0546E5pF0ptaF8CJZ8urzaHzuFnHQwLLVOP28rlAn1Qgy9sYPHhtTS6PJ46yWghIvBZPzXsa0QHhg9pnM8CgJp5kVY4H+rr7687edv1sst24pnKl2tbDm3YzOc0nLdkx9JvS7qurBRiXLvzdkeLNYfiHySgmnh66JSNmzKu3e683SkuQY="
 cache:
   directories:
     - $TRAVIS_BUILD_DIR/combined_lib_cache/
@@ -72,7 +71,7 @@ jobs:
         - travis_long "./mk_library.py -i combined_lib_cache"
         # make sure we use the same version of Lean that we started with in "Build-1"
         - cd combined_lib_cache
-        - ELAN_OVERRIDE=$(elan show | grep Lean | cut -d ',' -f1 | cut -d ' ' -f3)
+        - ELAN_OVERRIDE=$(lean -v | cut -d ',' -f1 | cut -d ' ' -f3)
         - cd ../lean-fibonacci
         - elan override set leanprover-community/lean:$ELAN_OVERRIDE
         - git pull
@@ -83,7 +82,7 @@ jobs:
       script:
         # make sure we use the same version of Lean that we started with in "Build-1"
         - cd combined_lib_cache
-        - export ELAN_OVERRIDE=$(elan show | grep Lean | cut -d ',' -f1 | cut -d ' ' -f3)
+        - export ELAN_OVERRIDE=$(lean -v | cut -d ',' -f1 | cut -d ' ' -f3)
         - cd ..
         - rm -rf .git
         - sh deploy.sh

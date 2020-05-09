@@ -1,14 +1,9 @@
-set -e				# fail on error
-
-# Only run on builds for pushes to the master branch.
-# if ! [ "$TRAVIS_EVENT_TYPE" = "push" -a "$TRAVIS_BRANCH" = "master" ]; then
-    # exit 0
-# fi
+set -e # fail on error
 
 # Make sure we have access to secure Travis environment variables.
 if ! [ "$TRAVIS_SECURE_ENV_VARS" = "true" ]; then
     echo 'deploy_nightly.sh: Build is a push to master, but no secure env vars.' >&2
-    exit 1			# Something's wrong.
+    exit 1 # Something's wrong.
 fi
 
 git clone https://github.com/bryangingechen/lean-web-editor-dist.git
@@ -28,11 +23,10 @@ git remote add deploy "https://$GITHUB_TOKEN@github.com/leanprover-community/lea
 rm -f lean-web-editor/*.worker.js
 cd ..
 
-LATEST_BROWSER_LEAN_URL=https://github.com/leanprover-community/lean/releases/download/v$ELAN_OVERRIDE/lean-$ELAN_OVERRIDE--browser.zip
-# $(curl -s -N https://$GITHUB_TOKEN@api.github.com/repos/leanprover-community/lean/releases | grep -m1 "browser_download_url.*browser.zip" | cut -d : -f 2,3 | tr -d \"\ )
-
 # After this point, we don't use any secrets in commands.
-set -x				# echo commands
+set -x # echo commands
+
+LATEST_BROWSER_LEAN_URL=https://github.com/leanprover-community/lean/releases/download/v$ELAN_OVERRIDE/lean-$ELAN_OVERRIDE--browser.zip
 
 rm -f dist/*.worker.js
 npm install

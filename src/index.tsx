@@ -477,14 +477,13 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           It also loads the <a href='https://github.com/leanprover-community/mathlib'>mathlib</a>,&nbsp;
           <a href='https://github.com/leanprover/super'>super</a> and&nbsp;
           <a href='https://github.com/leanprover/mini_crush'>mini-crush</a> packages.</p>
-          {/* TODO: show precise commits in library.zip here somehow? */}
           <h3>About this editor:</h3>
-          <p><a href='https://github.com/bryangingechen/lean-web-editor/tree/ui'>This editor</a> is a fork of the
+          <p><a href='https://github.com/leanprover-community/lean-web-editor/'>This editor</a> is a fork of the
           original <a href='https://leanprover.github.io/live'>lean-web-editor</a> app
           (written in typescript+react and using the Monaco
           editor; see the original github repository <a href='https://github.com/leanprover/lean-web-editor'>here</a>).
-          This page also uses <a href='https://github.com/bryangingechen/lean-client-js/tree/cache'>a forked version</a>
-          of the <a href='https://github.com/leanprover/lean-client-js'>lean-client-browser</a> package
+          This page also uses <a href='https://github.com/bryangingechen/lean-client-js/tree/cache'>a forked
+          version</a> of the <a href='https://github.com/leanprover/lean-client-js'>lean-client-browser</a> package
           that caches the library.zip file
           in <a href='https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API'>IndexedDB</a>.</p>
           <h3>Lean packages in library.zip:</h3>

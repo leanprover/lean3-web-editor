@@ -17,10 +17,10 @@ cd bryangingechen.github.io
 git remote add deploy "https://$GITHUB_TOKEN@github.com/bryangingechen/bryangingechen.github.io.git"
 cd ..
 
-git clone https://github.com/leanprover-community/leanprover-community.github.io.git
-cd leanprover-community.github.io
-git remote add deploy "https://$GITHUB_TOKEN@github.com/leanprover-community/leanprover-community.github.io.git"
-rm -f lean-web-editor/*.worker.js
+git clone --branch gh-pages https://github.com/leanprover-community/lean-web-editor.git
+cd lean-web-editor
+git remote add deploy "https://$GITHUB_TOKEN@github.com/leanprover-community/lean-web-editor.git"
+rm -f *.worker.js
 cd ..
 
 # After this point, we don't use any secrets in commands.
@@ -39,7 +39,7 @@ mv build/shell/* .
 rm -rf build/
 cd ..
 
-# push lean-web-editor-dist
+# push bryangingechen/lean-web-editor-dist
 cp -a dist/. lean-web-editor-dist
 cd lean-web-editor-dist
 git add -A
@@ -55,13 +55,13 @@ git diff-index HEAD
 git diff-index --quiet HEAD || { git commit -m "lean-web-editor-dist: $(date)" && git push deploy; }
 cd ..
 
-# push leanprover-community.github.io
+# push leanprover-community/lean-web-editor
 COMMUNITY=TRUE NODE_ENV=production ./node_modules/.bin/webpack
-cd leanprover-community.github.io
+cd lean-web-editor
 git pull
-cp -a ../dist/. lean-web-editor
-rm -f lean-web-editor/lib*
-rm -f lean-web-editor/lean_js_*
+cp -a ../dist/. .
+rm -f lib*
+rm -f lean_js_*
 git add -A
 git diff-index HEAD
 git diff-index --quiet HEAD || { git commit -m "lean-web-editor: $(date)" && git push deploy; }

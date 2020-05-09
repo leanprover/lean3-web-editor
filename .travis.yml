@@ -7,7 +7,7 @@ os:
     - linux
 branches:
   only:
-    - ui
+    - master
 
 env:
   global:

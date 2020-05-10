@@ -66,6 +66,10 @@ jobs:
       script:
         - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
 
+    - stage: Build-2c
+      script:
+        - travis_long "timeout 2400 ./mk_library.py -i combined_lib_cache" | python detect_errors.py
+
     - stage: Build-3
       script:
         - travis_long "./mk_library.py -i combined_lib_cache"

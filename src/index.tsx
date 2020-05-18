@@ -472,11 +472,6 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           <p>Click the colored bar to show / hide the header UI.</p>
           <p>Drag the separating line between the editor panel and info panels to adjust their relative sizes.</p>
 
-          <p>This page is running the Emscripten build of
-          the <a href='https://github.com/leanprover-community/lean'>"community" fork</a> of Lean 3.
-          It also loads the <a href='https://github.com/leanprover-community/mathlib'>mathlib</a>,&nbsp;
-          <a href='https://github.com/leanprover/super'>super</a> and&nbsp;
-          <a href='https://github.com/leanprover/mini_crush'>mini-crush</a> packages.</p>
           <h3>About this editor:</h3>
           <p><a href='https://github.com/leanprover-community/lean-web-editor/'>This editor</a> is a fork of the
           original <a href='https://leanprover.github.io/live'>lean-web-editor</a> app

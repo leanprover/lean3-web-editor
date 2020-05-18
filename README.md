@@ -14,7 +14,7 @@ npm install
 
 (You only need to run `npm install` and `./fetch_lean_js.sh` once after you download this repository.)
 
-The `fetch_lean_js.sh` script fetches a precompiled javascript version as well as a `library.zip` file containing the olean files for [`mathlib`](https://github.com/leanprover-community/mathlib), [`super`](https://github.com/leanprover/super), and [`mini_crush`](https://github.com/leanprover/mini_crush).
+The `fetch_lean_js.sh` script fetches a precompiled javascript version as well as a `library.zip` file containing the olean files for [`mathlib`](https://github.com/leanprover-community/mathlib).
 
 It is also possible to build your own Javascript / WebAssembly version of [the community fork of Lean 3](https://github.com/leanprover-community/lean). See the instructions [here](https://github.com/leanprover-community/lean/blob/master/doc/make/index.md#building-js--wasm-binaries-with-emscripten). Prebuilt versions are also included with the leanprover-community [lean releases](https://github.com/leanprover-community/lean/releases) or [lean-nightly releases](https://github.com/leanprover-community/lean-nightly/releases). Copy the files `lean_js_js.js`, `lean_js_wasm.js` and `lean_js_wasm.wasm` to the `dist/` directory. Note that if you choose to go this route, you will also have to recompile the `.olean` files in `library.zip` (see below).
 

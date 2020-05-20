@@ -441,12 +441,13 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           <p>Please note that this editor is not really meant for serious use.
           Most Lean users use the Lean VS Code or Emacs extensions to write proofs and programs.
           There are good installation guides for Lean 3 and its standard library "mathlib"&nbsp;
-          <a href='https://github.com/leanprover-community/mathlib#installation'>here</a>.
+          <a href='https://leanprover-community.github.io/get_started.html'>here</a>.
           The books <a href='https://leanprover.github.io/theorem_proving_in_lean'>Theorem Proving in Lean</a>&nbsp;
           and <a href='https://leanprover.github.io/logic_and_proof/'>Logic and Proof</a> are reasonable places
           to start learning Lean. For a more interactive approach,
           you might try <a href='http://wwwf.imperial.ac.uk/~buzzard/xena/natural_number_game/'>the
-          "Natural number game"</a>.
+          "Natural number game"</a>. For more resources, see the&nbsp;
+          <a href='https://leanprover-community.github.io/learn.html'>Learning Lean page</a>.
           If you have questions, drop by the&nbsp;
           <a href='https://leanprover.zulipchat.com/#'>leanprover zulip chat</a>.</p>
 
@@ -741,7 +742,7 @@ const defaultValue =
 if s ≠ "" then s ++ ", " else s, "commit ", (lean.githash.to_list.take 12).as_string, ")"]
 
 example (m n : ℕ) : m + n = n + m :=
-by simp [add_comm]`;
+by simp [nat.add_comm]`;
 
 interface HashParams {
   url: string;

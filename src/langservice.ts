@@ -111,6 +111,15 @@ export function checkInputCompletionChange(e: monaco.editor.IModelContentChanged
   }
   return null;
 }
+
+const hackyReplacements = {
+  ['{{}}']: '⦃⦄',
+  ['[[]]']: '⟦⟧',
+  ['<>']: '⟨⟩',
+  ['([])']: '⟮⟯',
+  ['f<>']: '‹›',
+  ['f<<>>']: '«»',
+};
 export function checkInputCompletionPosition(e: monaco.editor.ICursorPositionChangedEvent,
                                              editor: monaco.editor.IStandaloneCodeEditor,
                                              model: monaco.editor.IModel): boolean {
@@ -119,9 +128,13 @@ export function checkInputCompletionPosition(e: monaco.editor.ICursorPositionCha
   const cursorPos = e.position.column;
   const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
   const match = line.substring(index, cursorPos - 1);
-  const replaceText = translations[match];
-  return index && replaceText;
+  // ordinary completion
+  const replaceText = index && translations[match];
+  // hacky completions put the cursor between paired Unicode brackets
+  const hackyReplacement = index && hackyReplacements[match];
+  return replaceText || hackyReplacement;
 }
+
 export function tabHandler(editor: monaco.editor.IStandaloneCodeEditor,
                            model: monaco.editor.IModel): void {
   const sel = editor.getSelections();
@@ -130,14 +143,17 @@ export function tabHandler(editor: monaco.editor.IStandaloneCodeEditor,
   const cursorPos = sel[0].startColumn;
   const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
   const match = line.substring(index, cursorPos - 1);
-  const replaceText = translations[match];
-  if (index && replaceText) {
+  // ordinary completion
+  const replaceText = index && translations[match];
+  // hacky completions put the cursor between paired Unicode brackets
+  const hackyReplacement = index && hackyReplacements[match];
+  if (replaceText || hackyReplacement) {
     const range = new monaco.Range(lineNum, index, lineNum, cursorPos);
     editor.setSelections(model.pushEditOperations(sel, [{
       identifier: {major: 1, minor: 1},
       range,
-      text: replaceText,
-    forceMoveMarkers: false,
+      text: replaceText || hackyReplacement,
+      forceMoveMarkers: false,
     }], () => [new monaco.Selection(lineNum, index, lineNum, index)]));
     editor.setPosition(new monaco.Position(lineNum, index + 1));
   }

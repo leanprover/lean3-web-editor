@@ -476,11 +476,11 @@ function ModalContent({ onClose, modalRef, onKeyDown, clickAway }) {
           <h3>About this editor:</h3>
           <p><a href='https://github.com/leanprover-community/lean-web-editor/'>This editor</a> is a fork of the
           original <a href='https://leanprover.github.io/live'>lean-web-editor</a> app
-          (written in typescript+react and using the Monaco
-          editor; see the original github repository <a href='https://github.com/leanprover/lean-web-editor'>here</a>).
+          (written in TypeScript+React and using the Monaco
+          editor; see the original GitHub repository <a href='https://github.com/leanprover/lean-web-editor'>here</a>).
           This page also uses <a href='https://github.com/bryangingechen/lean-client-js/tree/cache'>a forked
           version</a> of the <a href='https://github.com/leanprover/lean-client-js'>lean-client-browser</a> package
-          that caches the library.zip file
+          that caches the <code>library.zip</code> file
           in <a href='https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API'>IndexedDB</a>.</p>
           <h3>Lean packages in library.zip:</h3>
           {libinfo}
@@ -820,12 +820,16 @@ const hostPrefix = process.env.COMMUNITY ? 'https://bryangingechen.github.io/lea
 const leanJsOpts: LeanJsOpts = {
   javascript: hostPrefix + 'lean_js_js.js',
   libraryZip: hostPrefix + 'library.zip',
+  libraryMeta: hostPrefix + 'library.info.json',
+  libraryOleanMap: hostPrefix + 'library.olean_map.json',
+  libraryKey: 'library',
   webassemblyJs: hostPrefix + 'lean_js_wasm.js',
   webassemblyWasm: hostPrefix + 'lean_js_wasm.wasm',
+  dbName: 'leanlibrary',
 };
 
 let info = null;
-const metaPromise = fetch(leanJsOpts.libraryZip.slice(0, -3) + 'info.json')
+const metaPromise = fetch(leanJsOpts.libraryMeta)
   .then((res) => res.json())
   .then((j) => info = j);
 

@@ -1,7 +1,7 @@
 [package]
 name = "combined_lib"
-version = "3.13.2"
-lean_version = "leanprover-community/lean:3.13.2"
+version = "3.14.0"
+lean_version = "leanprover-community/lean:3.14.0"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "434e6a65b8d8cc80371f7a6a835e672fa112c111"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "79e296bdc9f83b9447dc1b81730d36f63a99f72d"}

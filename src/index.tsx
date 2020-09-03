@@ -618,6 +618,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
     const minimumFontSize = ta.clientHeight;
     ta.remove();
     const node = findDOMNode(this.refs.monaco) as HTMLElement;
+    const DEFAULT_FONT_SIZE = 12;
     const options: monaco.editor.IEditorConstructionOptions = {
       selectOnLineNumbers: true,
       roundedSelection: false,
@@ -630,7 +631,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       minimap: {enabled: false},
       wordWrap: 'on',
       scrollBeyondLastLine: false,
-      fontSize: minimumFontSize > 1 ? minimumFontSize : null,
+      fontSize: Math.max(DEFAULT_FONT_SIZE, minimumFontSize),
     };
     this.editor = monaco.editor.create(node, options);
     const canTranslate = this.editor.createContextKey('canTranslate', false);

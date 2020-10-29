@@ -80,7 +80,7 @@ class ModelWatcher implements monaco.IDisposable {
   syncNow() { this.syncIn(0); }
 }
 
-const completeChars = new Set(' ,');
+const triggerChars = new Set(' ,');
 export function checkInputCompletionChange(e: monaco.editor.IModelContentChangedEvent,
                                            editor: monaco.editor.IStandaloneCodeEditor,
                                            model: monaco.editor.IModel): void {
@@ -88,30 +88,13 @@ export function checkInputCompletionChange(e: monaco.editor.IModelContentChanged
     return null;
   }
   const change = e.changes[0];
-  if (change.rangeLength === 0) {
-    if (completeChars.has(change.text)) {
-      const lineNum = change.range.startLineNumber;
-      const line = model.getLineContent(lineNum);
-      const cursorPos = change.range.startColumn;
-      const index = line.lastIndexOf('\\', cursorPos - 1) + 1;
-      const match = line.substring(index, cursorPos - 1);
-      const replaceText = translations[match];
-      if (index && replaceText) {
-        const range = new monaco.Range(lineNum, index, lineNum, cursorPos);
-        const sel = editor.getSelections();
-        editor.setSelections(model.pushEditOperations(sel, [{
-          identifier: {major: 1, minor: 1},
-          range,
-          text: replaceText,
-          forceMoveMarkers: false,
-        }], () => [new monaco.Selection(lineNum, index, lineNum, index)]));
-        editor.setPosition(new monaco.Position(lineNum, index + 2));
-      }
-    }
+  if (change.rangeLength === 0 && triggerChars.has(change.text)) {
+    completionEdit(editor, model, true);
   }
   return null;
 }
 
+// completionEdit() assumes that all these are 2 characters long!
 const hackyReplacements = {
   ['{{}}']: '⦃⦄',
   ['[[]]']: '⟦⟧',
@@ -135,8 +118,8 @@ export function checkInputCompletionPosition(e: monaco.editor.ICursorPositionCha
   return replaceText || hackyReplacement;
 }
 
-export function tabHandler(editor: monaco.editor.IStandaloneCodeEditor,
-                           model: monaco.editor.IModel): void {
+function completionEdit(editor: monaco.editor.IStandaloneCodeEditor,
+                        model: monaco.editor.IModel, triggeredByTyping: boolean): void {
   const sel = editor.getSelections();
   const lineNum = sel[0].startLineNumber;
   const line = model.getLineContent(lineNum);
@@ -148,15 +131,47 @@ export function tabHandler(editor: monaco.editor.IStandaloneCodeEditor,
   // hacky completions put the cursor between paired Unicode brackets
   const hackyReplacement = index && hackyReplacements[match];
   if (replaceText || hackyReplacement) {
-    const range = new monaco.Range(lineNum, index, lineNum, cursorPos);
-    editor.setSelections(model.pushEditOperations(sel, [{
-      identifier: {major: 1, minor: 1},
-      range,
-      text: replaceText || hackyReplacement,
-      forceMoveMarkers: false,
-    }], () => [new monaco.Selection(lineNum, index, lineNum, index)]));
-    editor.setPosition(new monaco.Position(lineNum, index + 1));
+    if (triggeredByTyping) {
+      const range1 = new monaco.Range(lineNum, index, lineNum, cursorPos);
+      editor.executeEdits(null, [{
+        identifier: {major: 1, minor: 1},
+        range: range1,
+        text: replaceText || hackyReplacement[0],
+        forceMoveMarkers: false,
+      }], [new monaco.Selection(lineNum, index + 1, lineNum, index + 1)]);
+      if (hackyReplacement) {
+        // put the closing bracket after the typed character
+        const range2 = new monaco.Range(lineNum, index + 2, lineNum, index + 2);
+        editor.executeEdits(null, [{
+          identifier: {major: 1, minor: 1},
+          range: range2,
+          text: hackyReplacement[1],
+          forceMoveMarkers: false,
+        }], [new monaco.Selection(lineNum, index + 1, lineNum, index + 1)]);
+      }
+      // HACK: monaco seems to move the cursor AFTER the onDidChangeModel event handlers are called,
+      // so we move the cursor +1 character to the right so that it's immediately after the typed character
+      // (assumes all unicode translations are 1 character long and
+      // all hackyReplacements have a 1-character opening brace!)
+      global.setTimeout(() => editor.setPosition(new monaco.Position(lineNum, index + 2)), 0);
+    } else {
+      const range = new monaco.Range(lineNum, index, lineNum, cursorPos);
+      editor.executeEdits(null, [{
+        identifier: {major: 1, minor: 1},
+        range,
+        text: replaceText || hackyReplacement,
+        forceMoveMarkers: false,
+      }], [new monaco.Selection(lineNum, index + 1, lineNum, index + 1)]);
+      // index + 1: the final cursor position is one character to the right of the initial '\'
+      // (assumes all unicode translations are 1 character long and
+      // all hackyReplacements have a 1-character opening brace!)
+    }
   }
+}
+
+export function tabHandler(editor: monaco.editor.IStandaloneCodeEditor,
+                           model: monaco.editor.IModel): void {
+  completionEdit(editor, model, false);
 }
 
 class CompletionBuffer {

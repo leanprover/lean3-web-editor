@@ -595,6 +595,7 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
     this.model.onDidChangeContent((e) => {
       checkInputCompletionChange(e, this.editor, this.model);
       const val = this.model.getValue();
+
       // do not change code URL param unless user has actually typed
       // (this makes the #url=... param a little more "sticky")
       return (!e.isFlush || !val) && this.props.onValueChange &&
@@ -634,14 +635,16 @@ class LeanEditor extends React.Component<LeanEditorProps, LeanEditorState> {
       fontSize: Math.max(DEFAULT_FONT_SIZE, minimumFontSize),
     };
     this.editor = monaco.editor.create(node, options);
+
+    // context key which keeps track of whether unicode translation is possible
     const canTranslate = this.editor.createContextKey('canTranslate', false);
+    this.editor.addCommand(monaco.KeyCode.Tab, () => {
+      tabHandler(this.editor, this.model);
+    }, 'canTranslate');
     this.editor.onDidChangeCursorPosition((e) => {
       canTranslate.set(checkInputCompletionPosition(e, this.editor, this.model));
       this.setState({cursor: {line: e.position.lineNumber, column: e.position.column - 1}});
     });
-    this.editor.addCommand(monaco.KeyCode.Tab, () => {
-      tabHandler(this.editor, this.model);
-    }, 'canTranslate');
 
     this.determineSplit();
     window.addEventListener('resize', this.updateDimensions);

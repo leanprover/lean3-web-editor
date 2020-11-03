@@ -1,6 +1,6 @@
 # lean-web-editor
 
-This repository contains the code for the leanprover-community fork of the [Lean live editor](https://leanprover-community.github.io/lean-web-editor). This branch uses [a fork of `lean-client-js`](https://github.com/bryangingechen/lean-client-js/tree/cache) (published as `@bryangingechen/lean-client-js` on npm).
+This repository contains the code for the leanprover-community fork of the [Lean live editor](https://leanprover-community.github.io/lean-web-editor).
 
 You will need to install [nodejs](https://nodejs.org/en/) (which should include npm) to try this out locally.
 

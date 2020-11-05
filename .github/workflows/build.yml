@@ -44,10 +44,10 @@ jobs:
           elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
           ./mk_library.py -c -o dist/libcore.zip | python detect_errors.py
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: libcore
-        path: ./dist/libcore.zip
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libcore
+          path: ./dist/libcore.zip
 
       - name: generate library.zip
         run: |
@@ -62,10 +62,10 @@ jobs:
           cd ..
           ./mk_library.py -i combined_lib | python detect_errors.py
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: library
-        path: ./dist/library.zip
+      - uses: actions/upload-artifact@v2
+        with:
+          name: library
+          path: ./dist/library.zip
 
       - name: Checkout lean-fibonacci
         run: git clone https://github.com/bryangingechen/lean-fibonacci.git
@@ -78,10 +78,10 @@ jobs:
           cd ..
           ./mk_library.py -i lean-fibonacci -o dist/libfib.zip | python detect_errors.py
 
-    - uses: actions/upload-artifact@v2
-      with:
-        name: libfib
-        path: ./dist/libfib.zip
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libfib
+          path: ./dist/libfib.zip
 
       - name: build site and deploy
         run: |

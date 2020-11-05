@@ -46,7 +46,9 @@ jobs:
 
       - name: generate library.zip
         run: |
+          rm -rf .git/
           cd combined_lib/
+          git init
           elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
           leanproject up
           cd ..
@@ -65,7 +67,6 @@ jobs:
 
       - name: build site and deploy
         run: |
-          rm -rf .git/
           sh deploy.sh
         env:
           GITHUB_TOKEN: ${{ secrets.DEPLOY_GITHUB_TOKEN }}

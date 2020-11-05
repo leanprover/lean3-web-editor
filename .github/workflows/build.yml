@@ -44,12 +44,14 @@ jobs:
           elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
           ./mk_library.py -c -o dist/libcore.zip | python detect_errors.py
 
-      - uses: actions/upload-artifact@v2
+      - name: upload libcore.zip artifact
+        uses: actions/upload-artifact@v2
         with:
           name: libcore
           path: ./dist/libcore.zip
 
-      - uses: actions/upload-artifact@v2
+      - name: upload libcore_meta.zip artifact
+        uses: actions/upload-artifact@v2
         with:
           name: libcore_meta
           path: ./dist/libcore.*.json
@@ -67,12 +69,14 @@ jobs:
           cd ..
           ./mk_library.py -i combined_lib | python detect_errors.py
 
-      - uses: actions/upload-artifact@v2
+      - name: upload library.zip artifact
+        uses: actions/upload-artifact@v2
         with:
           name: library
           path: ./dist/library.zip
 
-      - uses: actions/upload-artifact@v2
+      - name: upload library_meta.zip artifact
+        uses: actions/upload-artifact@v2
         with:
           name: library_meta
           path: ./dist/library.*.json
@@ -88,12 +92,14 @@ jobs:
           cd ..
           ./mk_library.py -i lean-fibonacci -o dist/libfib.zip | python detect_errors.py
 
-      - uses: actions/upload-artifact@v2
+      - name: upload libfib.zip artifact
+        uses: actions/upload-artifact@v2
         with:
           name: libfib
           path: ./dist/libfib.zip
 
-      - uses: actions/upload-artifact@v2
+      - name: upload libfib_meta.zip artifact
+        uses: actions/upload-artifact@v2
         with:
           name: libfib_meta
           path: ./dist/libfib.*.json

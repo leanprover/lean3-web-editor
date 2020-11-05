@@ -1,0 +1,69 @@
+name: build and deploy site and lib*.zip
+
+on:
+  schedule:
+    - cron: '0 20 * * *' # every day
+  push:
+    branches-ignore:
+      - 'gh-pages'
+  pull_request:
+    branches-ignore:
+      - 'gh-pages'
+
+jobs:
+  build:
+    name: build and deploy docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: install elan
+        run: |
+          set -o pipefail
+          curl https://raw.githubusercontent.com/Kha/elan/master/elan-init.sh -sSf | sh -s -- --default-toolchain none -y
+          echo "$HOME/.elan/bin" >> $GITHUB_PATH
+
+      - name: Get Lean version
+        run: |
+          set -o pipefail
+          ./elan_setup.sh
+          echo "LATEST_BROWSER_LEAN=$LATEST_BROWSER_LEAN" >> $GITHUB_ENV
+
+      - name: install Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: generate libcore.zip
+        run: |
+          elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
+          ./mk_library.py -c -o dist/libcore.zip
+
+      - name: generate library.zip
+        run: |
+          cd combined_lib/
+          elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
+          leanproject up
+          cd ..
+          ./mk_library.py -i combined_lib
+
+      - name: Checkout lean-fibonacci
+        run: git clone https://github.com/bryangingechen/lean-fibonacci.git
+
+      - name: generate libfib.zip
+        run: |
+          cd lean-fibonacci/
+          elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
+          leanpkg upgrade # don't get oleans, build for minimized libfib.zip
+          cd ..
+          ./mk_library.py -i lean-fibonacci -o dist/libfib.zip
+
+      - name: build site and deploy
+        run: |
+          rm -rf .git/
+          sh deploy.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPLOY_GITHUB_TOKEN }}
+          github_repo: ${{ github.repository }}
+          github_ref: ${{ github.ref }}

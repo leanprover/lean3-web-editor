@@ -27,7 +27,7 @@ jobs:
       - name: Get Lean version
         run: |
           set -o pipefail
-          ./elan_setup.sh
+          source elan_setup.sh
           echo "LATEST_BROWSER_LEAN=$LATEST_BROWSER_LEAN" >> $GITHUB_ENV
 
       - name: install Python

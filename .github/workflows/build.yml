@@ -49,6 +49,11 @@ jobs:
           name: libcore
           path: ./dist/libcore.zip
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libcore_meta
+          path: ./dist/libcore.*.json
+
       - name: generate library.zip
         run: |
           rm -rf .git/
@@ -67,6 +72,11 @@ jobs:
           name: library
           path: ./dist/library.zip
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: library_meta
+          path: ./dist/library.*.json
+
       - name: Checkout lean-fibonacci
         run: git clone https://github.com/bryangingechen/lean-fibonacci.git
 
@@ -82,6 +92,11 @@ jobs:
         with:
           name: libfib
           path: ./dist/libfib.zip
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: libfib_meta
+          path: ./dist/libfib.*.json
 
       - name: build site and deploy
         run: |

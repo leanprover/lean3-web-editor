@@ -42,7 +42,7 @@ jobs:
       - name: generate libcore.zip
         run: |
           elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
-          ./mk_library.py -c -o dist/libcore.zip
+          ./mk_library.py -c -o dist/libcore.zip | detect_errors.py
 
       - name: generate library.zip
         run: |
@@ -50,9 +50,12 @@ jobs:
           cd combined_lib/
           git init
           elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
-          leanproject up
+          leanproject --no-lean-upgrade up
+          rm -rf _target/deps/mathlib/test
+          rm -rf _target/deps/mathlib/scripts
+          rm -rf _target/deps/mathlib/roadmap
           cd ..
-          ./mk_library.py -i combined_lib
+          ./mk_library.py -i combined_lib | detect_errors.py
 
       - name: Checkout lean-fibonacci
         run: git clone https://github.com/bryangingechen/lean-fibonacci.git
@@ -63,7 +66,7 @@ jobs:
           elan override set leanprover-community/lean:$LATEST_BROWSER_LEAN
           leanpkg upgrade # don't get oleans, build for minimized libfib.zip
           cd ..
-          ./mk_library.py -i lean-fibonacci -o dist/libfib.zip
+          ./mk_library.py -i lean-fibonacci -o dist/libfib.zip | detect_errors.py
 
       - name: build site and deploy
         run: |

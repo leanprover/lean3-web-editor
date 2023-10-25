@@ -1,6 +1,10 @@
-# lean-web-editor
+# DEPRECATED
 
-This repository contains the javascript code for the [lean live editor](https://leanprover.github.io/live/).
+See [lean4web](https://github.com/leanprover-community/lean4web) for a solution for Lean 4.
+
+# lean3-web-editor
+
+This repository contains the javascript code for the a Lean 3 live editor.
 
 ## Running the development version
 
